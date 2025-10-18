@@ -1,7 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Load environment variables
+  try {
+    await dotenv.load(fileName: '.env');
+  } catch (e) {
+    // If .env doesn't exist, continue with default/empty values
+    debugPrint('Warning: .env file not found. Using default configuration.');
+  }
+  
   runApp(
     const ProviderScope(
       child: StylemakeApp(),
