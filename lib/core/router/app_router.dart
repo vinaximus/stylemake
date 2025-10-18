@@ -8,6 +8,9 @@ import 'package:stylemake/features/masters/screens/vendors/vendors_list_screen.d
 import 'package:stylemake/features/production/screens/cuttings/cutting_detail_screen.dart';
 import 'package:stylemake/features/production/screens/cuttings/cutting_form_screen.dart';
 import 'package:stylemake/features/production/screens/cuttings/cuttings_list_screen.dart';
+import 'package:stylemake/features/production/screens/pos/po_detail_screen.dart';
+import 'package:stylemake/features/production/screens/pos/po_form_screen.dart';
+import 'package:stylemake/features/production/screens/pos/pos_list_screen.dart';
 import 'package:stylemake/features/production/screens/production_home_screen.dart';
 import 'package:stylemake/features/reports/screens/reports_home_screen.dart';
 
@@ -35,6 +38,12 @@ class AppRouter {
   static const String cuttingsAdd = '/production/cuttings/add';
   static String cuttingsEdit(String id) => '/production/cuttings/$id/edit';
   static String cuttingsDetail(String id) => '/production/cuttings/$id';
+
+  // PO routes
+  static const String posList = '/production/pos';
+  static const String posAdd = '/production/pos/add';
+  static String posEditPath(String id) => '/production/pos/$id/edit';
+  static String posDetailPath(String id) => '/production/pos/$id';
 
   /// Router configuration with ShellRoute for AppShell
   static final GoRouter router = GoRouter(
@@ -134,6 +143,39 @@ class AppRouter {
               return NoTransitionPage(
                 child: CuttingDetailScreen(cuttingId: id),
               );
+            },
+          ),
+          // PO routes
+          GoRoute(
+            path: posList,
+            name: 'posList',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: PosListScreen()),
+          ),
+          GoRoute(
+            path: posAdd,
+            name: 'posAdd',
+            pageBuilder: (context, state) {
+              final cuttingId = state.uri.queryParameters['cuttingId'];
+              return NoTransitionPage(
+                child: PoFormScreen(cuttingId: cuttingId),
+              );
+            },
+          ),
+          GoRoute(
+            path: '/production/pos/:id/edit',
+            name: 'posEdit',
+            pageBuilder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return NoTransitionPage(child: PoFormScreen(poId: id));
+            },
+          ),
+          GoRoute(
+            path: '/production/pos/:id',
+            name: 'posDetail',
+            pageBuilder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return NoTransitionPage(child: PoDetailScreen(poId: id));
             },
           ),
         ],

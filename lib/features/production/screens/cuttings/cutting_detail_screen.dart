@@ -6,6 +6,7 @@ import 'package:stylemake/core/constants/layout_constants.dart';
 import 'package:stylemake/core/router/app_router.dart';
 import 'package:stylemake/core/widgets/responsive_center.dart';
 import 'package:stylemake/features/production/providers/cutting_providers.dart';
+import 'package:stylemake/features/production/providers/po_providers.dart';
 
 /// Cutting detail screen showing cutting information and linked POs
 class CuttingDetailScreen extends ConsumerWidget {
@@ -16,6 +17,7 @@ class CuttingDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cuttingAsync = ref.watch(cuttingByIdProvider(cuttingId));
+    final posAsync = ref.watch(posByCuttingProvider(cuttingId));
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -133,39 +135,158 @@ class CuttingDetailScreen extends ConsumerWidget {
                                 ),
                               ),
                               FilledButton.icon(
-                                onPressed: null, // Will be enabled in Phase 5
+                                onPressed: () {
+                                  context.push(
+                                    '${AppRouter.posAdd}?cuttingId=$cuttingId',
+                                  );
+                                },
                                 icon: const Icon(Icons.add, size: 18),
                                 label: const Text('Create PO'),
                               ),
                             ],
                           ),
                           const Divider(height: 24),
-                          Center(
-                            child: Column(
-                              children: [
-                                Icon(
-                                  Icons.receipt_long_outlined,
-                                  size: 64,
-                                  color: theme.colorScheme.outline,
-                                ),
-                                const SizedBox(
-                                  height: LayoutConstants.spaceMedium,
-                                ),
-                                Text(
-                                  'No POs linked yet',
-                                  style: theme.textTheme.titleMedium,
-                                ),
-                                const SizedBox(
-                                  height: LayoutConstants.spaceSmall,
-                                ),
-                                Text(
-                                  'Purchase orders will be created in Phase 5',
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: theme.colorScheme.onSurfaceVariant,
+                          posAsync.when(
+                            data: (pos) {
+                              if (pos.isEmpty) {
+                                return Center(
+                                  child: Column(
+                                    children: [
+                                      Icon(
+                                        Icons.receipt_long_outlined,
+                                        size: 64,
+                                        color: theme.colorScheme.outline,
+                                      ),
+                                      const SizedBox(
+                                        height: LayoutConstants.spaceMedium,
+                                      ),
+                                      Text(
+                                        'No POs linked yet',
+                                        style: theme.textTheme.titleMedium,
+                                      ),
+                                      const SizedBox(
+                                        height: LayoutConstants.spaceSmall,
+                                      ),
+                                      Text(
+                                        'Click "Create PO" to add a purchase order',
+                                        style: theme.textTheme.bodyMedium
+                                            ?.copyWith(
+                                              color: theme
+                                                  .colorScheme
+                                                  .onSurfaceVariant,
+                                            ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
                                   ),
-                                  textAlign: TextAlign.center,
+                                );
+                              }
+
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${pos.length} Purchase ${pos.length == 1 ? 'Order' : 'Orders'}',
+                                    style: theme.textTheme.titleSmall?.copyWith(
+                                      color: theme.colorScheme.primary,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    height: LayoutConstants.spaceSmall,
+                                  ),
+                                  ...pos.map(
+                                    (po) => Padding(
+                                      padding: const EdgeInsets.only(
+                                        bottom: LayoutConstants.spaceSmall,
+                                      ),
+                                      child: InkWell(
+                                        onTap: () {
+                                          context.push(
+                                            AppRouter.posDetailPath(po.id),
+                                          );
+                                        },
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            border: Border.all(
+                                              color: theme.colorScheme.outline
+                                                  .withOpacity(0.5),
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                Icons.receipt_long,
+                                                size: 20,
+                                                color:
+                                                    theme.colorScheme.primary,
+                                              ),
+                                              const SizedBox(width: 12),
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      po.poNumber,
+                                                      style: theme
+                                                          .textTheme
+                                                          .titleSmall
+                                                          ?.copyWith(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                          ),
+                                                    ),
+                                                    const SizedBox(height: 4),
+                                                    Text(
+                                                      '${po.vendorName} • ${po.fabricationType}',
+                                                      style: theme
+                                                          .textTheme
+                                                          .bodySmall,
+                                                    ),
+                                                    Text(
+                                                      'Qty: ${po.quantityIssued} • ₹${po.totalAmount.toStringAsFixed(2)}',
+                                                      style: theme
+                                                          .textTheme
+                                                          .bodySmall
+                                                          ?.copyWith(
+                                                            color: theme
+                                                                .colorScheme
+                                                                .onSurfaceVariant,
+                                                          ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              Icon(
+                                                Icons.chevron_right,
+                                                color:
+                                                    theme.colorScheme.outline,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                            loading: () => const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                            error: (error, stack) => Center(
+                              child: Text(
+                                'Error loading POs',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.error,
                                 ),
-                              ],
+                              ),
                             ),
                           ),
                         ],
@@ -248,4 +369,3 @@ class CuttingDetailScreen extends ConsumerWidget {
     );
   }
 }
-

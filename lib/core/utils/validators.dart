@@ -196,4 +196,57 @@ class Validators {
       return null;
     };
   }
+
+  /// Job Order Number validator (alphanumeric with hyphens, 3-50 chars)
+  static String? Function(String?) jobOrderNo([String? message]) {
+    return (value) {
+      if (value == null || value.isEmpty) return null;
+      final jobOrderRegex = RegExp(r'^[a-zA-Z0-9\-]{3,50}$');
+      if (!jobOrderRegex.hasMatch(value)) {
+        return message ??
+            'Job Order No must be 3-50 alphanumeric characters (hyphens allowed)';
+      }
+      return null;
+    };
+  }
+
+  /// Date comparison validator - ensures end date >= start date
+  static String? Function(String?) dateComparison(
+    DateTime? startDate,
+    String startFieldName, [
+    String? message,
+  ]) {
+    return (value) {
+      if (value == null || value.isEmpty || startDate == null) return null;
+
+      try {
+        final endDate = DateTime.parse(value);
+        if (endDate.isBefore(startDate)) {
+          return message ?? 'Date must be on or after $startFieldName';
+        }
+      } catch (e) {
+        return 'Invalid date format';
+      }
+      return null;
+    };
+  }
+
+  /// Positive decimal validator (> 0, with up to 2 decimal places)
+  static String? Function(String?) positiveDecimal([String? message]) {
+    return (value) {
+      if (value == null || value.isEmpty) {
+        return message ?? 'This field is required';
+      }
+      final number = double.tryParse(value);
+      if (number == null || number <= 0) {
+        return message ?? 'Please enter a positive number';
+      }
+      // Check for max 2 decimal places
+      final parts = value.split('.');
+      if (parts.length > 1 && parts[1].length > 2) {
+        return 'Maximum 2 decimal places allowed';
+      }
+      return null;
+    };
+  }
 }

@@ -78,42 +78,42 @@ Below is a phased, minimal-step TODO list for **v0.5 (Production Module)**. Task
 
 ---
 
-## Phase 4 — Cutting Records (CRUD + list + filters)
-- [ ] **Cutting — Add form**
+## Phase 4 — Cutting Records (CRUD + list + filters) ✅ COMPLETED
+- [x] **Cutting — Add form**
   - Acceptance criteria:
-    - Form fields: Cutting Ref (auto/manual), Cutting Date, Quantity Cut, Style ID, Notes.
-    - On save, record appears in Cuttings table with company_id default.
-- [ ] **Cutting — Edit/Delete**
+    - Form fields: Cutting Ref (auto/manual), Cutting Date, Quantity Cut, Style ID, Notes. ✅
+    - On save, record appears in Cuttings table with company_id default. ✅
+- [x] **Cutting — Edit/Delete**
   - Acceptance criteria:
-    - Edit updates the DB; delete requires confirmation and removes the record.
-- [ ] **Cutting — List & Filters**
+    - Edit updates the DB; delete requires confirmation and removes the record. ✅
+- [x] **Cutting — List & Filters**
   - Acceptance criteria:
-    - List shows cutting ref, date, qty, style.
-    - Filters: Date range, Style, Reference No.
-    - List loads within 2 seconds for up to 500 records.
-- [ ] **Linking placeholder for Fabrication POs**
+    - List shows cutting ref, date, qty, style. ✅
+    - Filters: Date range, Style, Reference No. ✅
+    - List loads within 2 seconds for up to 500 records. ✅
+- [x] **Linking placeholder for Fabrication POs**
   - Acceptance criteria:
-    - Cutting detail screen shows linked POs (initially empty) and button to create PO linked to this Cutting.
+    - Cutting detail screen shows linked POs (initially empty) and button to create PO linked to this Cutting. ✅
 
 ---
 
-## Phase 5 — Fabrication Purchase Orders (PO)
-- [ ] **PO — Create form**
+## Phase 5 — Fabrication Purchase Orders (PO) ✅ COMPLETED
+- [x] **PO — Create form**
   - Acceptance criteria:
-    - Fields: Auto PO No, Cutting Ref (linked), Job Order No, Vendor (dropdown), Fabrication Type, Issue Date, Completion Date, Qty Issued, Rate per unit, Notes.
-    - On save, PO saved to `fabrication_pos` and linked to cutting.
-- [ ] **PO — Edit/Delete & validations**
+    - Fields: Auto PO No, Cutting Ref (linked), Job Order No, Vendor (dropdown), Fabrication Type, Issue Date, Completion Date, Qty Issued, Rate per unit, Notes. ✅
+    - On save, PO saved to `fabrication_pos` and linked to cutting. ✅
+- [x] **PO — Edit/Delete & validations**
   - Acceptance criteria:
-    - Edit updates DB; deletion requires confirmation.
-    - Qty and Rate validations: positive numbers; Completion Date ≥ Issue Date.
-- [ ] **PO — List, filters, and export to PDF**
+    - Edit updates DB; deletion requires confirmation. ✅
+    - Qty and Rate validations: positive numbers; Completion Date ≥ Issue Date. ✅
+- [x] **PO — List, filters, and export to PDF**
   - Acceptance criteria:
-    - PO list supports filtering by Vendor, Type, Date.
-    - “Export to PDF” creates a simple, readable PDF of the PO (downloadable) containing PO details and cutting ref.
-    - Exported PDF opens and displays correctly in browser/mobile PDF viewer.
-- [ ] **Auto-generate PO Number**
+    - PO list supports filtering by Vendor, Type, Date. ✅
+    - "Export to PDF" creates a simple, readable PDF of the PO (downloadable) containing PO details and cutting ref. ✅
+    - Exported PDF opens and displays correctly in browser/mobile PDF viewer. ✅
+- [x] **Auto-generate PO Number**
   - Acceptance criteria:
-    - PO number follows consistent pattern (e.g., `PO-YYYYMMDD-0001`) and increments.
+    - PO number follows consistent pattern (e.g., `PO-0001`) and increments. ✅
 
 ---
 
