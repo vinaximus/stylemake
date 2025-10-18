@@ -10,21 +10,43 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stylemake/main.dart';
 
 void main() {
-  testWidgets('App renders placeholder home page', (WidgetTester tester) async {
+  testWidgets('App renders with bottom navigation', (
+    WidgetTester tester,
+  ) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const StylemakeApp());
 
-    // Wait for the initial frame
-    await tester.pump();
+    // Wait for the initial frame and navigation
+    await tester.pumpAndSettle();
 
-    // Verify that the app title is present.
-    expect(find.text('Stylemake'), findsOneWidget);
-    expect(find.text('Garment Manufacturing Management'), findsOneWidget);
+    // Verify that the bottom navigation is present
+    expect(find.text('Production'), findsOneWidget);
+    expect(find.text('Masters'), findsOneWidget);
+    expect(find.text('Reports'), findsOneWidget);
 
-    // Verify the Phase 1 message is present.
-    expect(find.text('Phase 1 - Database Setup'), findsOneWidget);
+    // Verify the Production screen is shown by default
+    expect(find.text('Production Module'), findsOneWidget);
+  });
 
-    // Note: Connection test is async and will complete quickly in tests
-    // We just verify the basic UI renders correctly
+  testWidgets('Bottom navigation switches screens', (
+    WidgetTester tester,
+  ) async {
+    // Build our app
+    await tester.pumpWidget(const StylemakeApp());
+    await tester.pumpAndSettle();
+
+    // Tap on Masters tab
+    await tester.tap(find.text('Masters'));
+    await tester.pumpAndSettle();
+
+    // Verify Masters screen is shown
+    expect(find.text('Master Data Management'), findsOneWidget);
+
+    // Tap on Reports tab
+    await tester.tap(find.text('Reports'));
+    await tester.pumpAndSettle();
+
+    // Verify Reports screen is shown
+    expect(find.text('Reports & Analytics'), findsOneWidget);
   });
 }
