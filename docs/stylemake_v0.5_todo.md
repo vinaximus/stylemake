@@ -30,19 +30,19 @@ Below is a phased, minimal-step TODO list for **v0.5 (Production Module)**. Task
 
 ---
 
-## Phase 1 — Supabase baseline & DB schema (single-company defaults)
-- [ ] **Create Supabase project & baseline tables (schema from PRD)**
+## Phase 1 — Supabase baseline & DB schema (single-company defaults) ✅ COMPLETED
+- [x] **Create Supabase project & baseline tables (schema from PRD)**
   - Acceptance criteria:
-    - Supabase project created and accessible.
-    - Tables created: `cuttings`, `fabrication_pos`, `item_issues`, `bills`, `receipts`, `styles`, `vendors`.
-    - All tables include `company_id` and `user_id` defaulting to `00000000-0000-0000-0000-000000000000` as specified.
-- [ ] **Add basic indices and constraints**
+    - Supabase project created and accessible. ✅
+    - Tables created: `cuttings`, `fabrication_pos`, `item_issues`, `bills`, `receipts`, `styles`, `vendors`. ✅
+    - All tables include `company_id` and `user_id` defaulting to `00000000-0000-0000-0000-000000000000` as specified. ✅
+- [x] **Add basic indices and constraints**
   - Acceptance criteria:
-    - Primary keys present.
-    - Foreign key references where applicable (e.g., PO → cutting, issue → PO).
-- [ ] **Seed minimal master data**
+    - Primary keys present. ✅
+    - Foreign key references where applicable (e.g., PO → cutting, issue → PO). ✅
+- [x] **Seed minimal master data**
   - Acceptance criteria:
-    - At least 3 styles and 3 vendors inserted for UI testing.
+    - At least 3 styles and 3 vendors inserted for UI testing. ✅
 
 ---
 
