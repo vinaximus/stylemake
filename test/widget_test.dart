@@ -14,11 +14,17 @@ void main() {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const StylemakeApp());
 
+    // Wait for the initial frame
+    await tester.pump();
+
     // Verify that the app title is present.
     expect(find.text('Stylemake'), findsOneWidget);
     expect(find.text('Garment Manufacturing Management'), findsOneWidget);
 
-    // Verify the placeholder message is present.
-    expect(find.text('Production Module Coming Soon'), findsOneWidget);
+    // Verify the Phase 1 message is present.
+    expect(find.text('Phase 1 - Database Setup'), findsOneWidget);
+
+    // Note: Connection test is async and will complete quickly in tests
+    // We just verify the basic UI renders correctly
   });
 }
