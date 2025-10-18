@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:stylemake/core/constants/layout_constants.dart';
 import 'package:stylemake/core/router/app_router.dart';
+import 'package:stylemake/core/widgets/responsive_center.dart';
 
 /// Masters module home screen
 class MastersHomeScreen extends StatelessWidget {
@@ -13,7 +14,8 @@ class MastersHomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Masters')),
-      body: Padding(
+      body: ResponsiveCenter(
+        maxWidth: 800.0,
         padding: const EdgeInsets.all(LayoutConstants.paddingLarge),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,7 +41,7 @@ class MastersHomeScreen extends StatelessWidget {
                 subtitle: const Text('Manage garment styles'),
                 trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                 onTap: () {
-                  context.go(AppRouter.stylesList);
+                  context.push(AppRouter.stylesList);
                 },
               ),
             ),
@@ -51,7 +53,7 @@ class MastersHomeScreen extends StatelessWidget {
                 subtitle: const Text('Manage fabrication vendors'),
                 trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                 onTap: () {
-                  context.go(AppRouter.vendorsList);
+                  context.push(AppRouter.vendorsList);
                 },
               ),
             ),

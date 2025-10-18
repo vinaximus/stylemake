@@ -43,6 +43,9 @@ class LayoutConstants {
 
   // Content constraints
   static const double maxContentWidth = 1200.0;
+  static const double maxFormWidth = 600.0;
+  static const double maxListWidth = 1000.0;
+  static const double maxHomeWidth = 800.0;
   static const double minCardWidth = 280.0;
 
   // List item heights

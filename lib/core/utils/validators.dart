@@ -81,6 +81,18 @@ class Validators {
     };
   }
 
+  /// Positive integer validator (> 0)
+  static String? Function(String?) positiveInteger([String? message]) {
+    return (value) {
+      if (value == null || value.isEmpty) return null;
+      final number = int.tryParse(value);
+      if (number == null || number <= 0) {
+        return message ?? 'Please enter a positive integer';
+      }
+      return null;
+    };
+  }
+
   /// Non-negative number validator (>= 0)
   static String? Function(String?) nonNegativeNumber([String? message]) {
     return (value) {
@@ -151,6 +163,19 @@ class Validators {
       if (value == null || value.isEmpty) return null;
       if (!regex.hasMatch(value)) {
         return message ?? 'Invalid format';
+      }
+      return null;
+    };
+  }
+
+  /// Cutting reference format validator (letters, numbers, hyphens)
+  static String? Function(String?) cuttingRefFormat([String? message]) {
+    return (value) {
+      if (value == null || value.isEmpty) return null;
+      final cuttingRefRegex = RegExp(r'^[A-Z0-9\-]+$');
+      if (!cuttingRefRegex.hasMatch(value)) {
+        return message ??
+            'Only uppercase letters, numbers, and hyphens allowed';
       }
       return null;
     };

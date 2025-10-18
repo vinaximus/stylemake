@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:stylemake/core/constants/layout_constants.dart';
+import 'package:stylemake/core/router/app_router.dart';
+import 'package:stylemake/core/widgets/responsive_center.dart';
 
 /// Production module home screen (placeholder for Phase 3+)
 class ProductionHomeScreen extends StatelessWidget {
@@ -11,53 +14,80 @@ class ProductionHomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Production')),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(LayoutConstants.paddingLarge),
+      body: ResponsiveCenter(
+        maxWidth: 800.0,
+        padding: const EdgeInsets.all(LayoutConstants.paddingLarge),
+        child: SingleChildScrollView(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
-                Icons.factory,
-                size: 80,
-                color: theme.colorScheme.primary.withOpacity(0.5),
-              ),
-              const SizedBox(height: LayoutConstants.spaceLarge),
               Text(
-                'Production Module',
-                style: theme.textTheme.headlineMedium?.copyWith(
-                  color: theme.colorScheme.primary,
+                'Production Management',
+                style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: LayoutConstants.spaceMedium),
+              const SizedBox(height: LayoutConstants.spaceSmall),
               Text(
-                'Manage cuttings, fabrication POs, item issues, bills, and receipts',
+                'Manage your production workflow from cutting to receipts',
                 style: theme.textTheme.bodyLarge?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
-                textAlign: TextAlign.center,
               ),
-              const SizedBox(height: LayoutConstants.spaceXLarge),
+              const SizedBox(height: LayoutConstants.spaceLarge),
               Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(LayoutConstants.paddingLarge),
-                  child: Column(
-                    children: [
-                      const Icon(Icons.construction, size: 48),
-                      const SizedBox(height: LayoutConstants.spaceMedium),
-                      Text(
-                        'Coming in Phase 4-8',
-                        style: theme.textTheme.titleLarge,
-                      ),
-                      const SizedBox(height: LayoutConstants.spaceSmall),
-                      Text(
-                        'Cuttings, POs, Issues, Bills, and Receipts will be implemented in upcoming phases',
-                        style: theme.textTheme.bodyMedium,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
+                child: ListTile(
+                  leading: const Icon(Icons.content_cut),
+                  title: const Text('Cutting Records'),
+                  subtitle: const Text('Manage fabric cuttings'),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  onTap: () {
+                    context.push(AppRouter.cuttingsList);
+                  },
+                ),
+              ),
+              const SizedBox(height: LayoutConstants.spaceSmall),
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.receipt_long),
+                  title: const Text('Fabrication POs'),
+                  subtitle: const Text('Coming in Phase 5'),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  onTap: null,
+                  enabled: false,
+                ),
+              ),
+              const SizedBox(height: LayoutConstants.spaceSmall),
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.inventory),
+                  title: const Text('Item Issues'),
+                  subtitle: const Text('Coming in Phase 6'),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  onTap: null,
+                  enabled: false,
+                ),
+              ),
+              const SizedBox(height: LayoutConstants.spaceSmall),
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.request_quote),
+                  title: const Text('Bills'),
+                  subtitle: const Text('Coming in Phase 7'),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  onTap: null,
+                  enabled: false,
+                ),
+              ),
+              const SizedBox(height: LayoutConstants.spaceSmall),
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.check_circle),
+                  title: const Text('Receipts'),
+                  subtitle: const Text('Coming in Phase 8'),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  onTap: null,
+                  enabled: false,
                 ),
               ),
             ],

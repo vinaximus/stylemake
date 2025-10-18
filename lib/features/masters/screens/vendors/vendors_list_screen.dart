@@ -6,6 +6,7 @@ import 'package:stylemake/core/utils/snackbar_utils.dart';
 import 'package:stylemake/core/widgets/app_fab.dart';
 import 'package:stylemake/core/widgets/dialogs/confirm_dialog.dart';
 import 'package:stylemake/core/widgets/list_card_item.dart';
+import 'package:stylemake/core/widgets/responsive_center.dart';
 import 'package:stylemake/features/masters/providers/vendor_providers.dart';
 
 /// Vendor Master list screen
@@ -112,41 +113,43 @@ class VendorsListScreen extends ConsumerWidget {
               return _buildNoResultsState(context, searchQuery, cityFilter);
             }
 
-            return ListView.builder(
-              padding: const EdgeInsets.all(LayoutConstants.paddingMedium),
-              itemCount: filteredVendors.length,
-              itemBuilder: (context, index) {
-                final vendor = filteredVendors[index];
-                return ListCardItem(
-                  title: vendor.name,
-                  subtitle: _buildVendorSubtitle(vendor),
-                  leading: CircleAvatar(
-                    child: Text(
-                      vendor.name.isNotEmpty
-                          ? vendor.name[0].toUpperCase()
-                          : 'V',
+            return ResponsiveListContainer(
+              child: ListView.builder(
+                padding: const EdgeInsets.all(LayoutConstants.paddingMedium),
+                itemCount: filteredVendors.length,
+                itemBuilder: (context, index) {
+                  final vendor = filteredVendors[index];
+                  return ListCardItem(
+                    title: vendor.name,
+                    subtitle: _buildVendorSubtitle(vendor),
+                    leading: CircleAvatar(
+                      child: Text(
+                        vendor.name.isNotEmpty
+                            ? vendor.name[0].toUpperCase()
+                            : 'V',
+                      ),
                     ),
-                  ),
-                  trailing: [
-                    IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: () {
-                        context.go('/masters/vendors/${vendor.id}/edit');
-                      },
-                      tooltip: 'Edit',
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () =>
-                          _deleteVendor(context, ref, vendor.id, vendor.name),
-                      tooltip: 'Delete',
-                    ),
-                  ],
-                  onTap: () {
-                    // Could navigate to detail view in future
-                  },
-                );
-              },
+                    trailing: [
+                      IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () {
+                          context.push('/masters/vendors/${vendor.id}/edit');
+                        },
+                        tooltip: 'Edit',
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () =>
+                            _deleteVendor(context, ref, vendor.id, vendor.name),
+                        tooltip: 'Delete',
+                      ),
+                    ],
+                    onTap: () {
+                      // Could navigate to detail view in future
+                    },
+                  );
+                },
+              ),
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -155,7 +158,7 @@ class VendorsListScreen extends ConsumerWidget {
       ),
       floatingActionButton: AppFab(
         onPressed: () {
-          context.go('/masters/vendors/add');
+          context.push('/masters/vendors/add');
         },
         label: 'Add Vendor',
         icon: Icons.add,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stylemake/core/constants/layout_constants.dart';
+import 'package:stylemake/core/widgets/responsive_center.dart';
 
 /// Reports module home screen (placeholder for Phase 8+)
 class ReportsHomeScreen extends StatelessWidget {
@@ -11,9 +12,10 @@ class ReportsHomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Reports')),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(LayoutConstants.paddingLarge),
+      body: ResponsiveCenter(
+        maxWidth: 800.0,
+        padding: const EdgeInsets.all(LayoutConstants.paddingLarge),
+        child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

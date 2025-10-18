@@ -5,6 +5,7 @@ import 'package:stylemake/core/constants/layout_constants.dart';
 import 'package:stylemake/core/utils/snackbar_utils.dart';
 import 'package:stylemake/core/utils/validators.dart';
 import 'package:stylemake/core/widgets/form/text_input_field.dart';
+import 'package:stylemake/core/widgets/responsive_center.dart';
 import 'package:stylemake/features/masters/providers/style_providers.dart';
 
 /// Style form screen for Add/Edit
@@ -111,57 +112,63 @@ class _StyleFormScreenState extends ConsumerState<StyleFormScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(LayoutConstants.paddingLarge),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    TextInputField(
-                      controller: _nameController,
-                      label: 'Style Name',
-                      hint: 'e.g., T-Shirt Basic, Polo Shirt',
-                      validator: Validators.compose([
-                        Validators.required('Style name is required'),
-                        Validators.minLength(
-                          3,
-                          'Minimum 3 characters required',
-                        ),
-                        Validators.maxLength(
-                          100,
-                          'Maximum 100 characters allowed',
-                        ),
-                      ]),
-                      enabled: !_isSaving,
-                      textCapitalization: TextCapitalization.words,
-                    ),
-                    const SizedBox(height: LayoutConstants.spaceXLarge),
-                    Row(
+              child: ResponsiveFormContainer(
+                child: Padding(
+                  padding: const EdgeInsets.all(LayoutConstants.paddingLarge),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: _isSaving ? null : () => context.pop(),
-                            child: const Text('Cancel'),
-                          ),
+                        TextInputField(
+                          controller: _nameController,
+                          label: 'Style Name',
+                          hint: 'e.g., T-Shirt Basic, Polo Shirt',
+                          validator: Validators.compose([
+                            Validators.required('Style name is required'),
+                            Validators.minLength(
+                              3,
+                              'Minimum 3 characters required',
+                            ),
+                            Validators.maxLength(
+                              100,
+                              'Maximum 100 characters allowed',
+                            ),
+                          ]),
+                          enabled: !_isSaving,
+                          textCapitalization: TextCapitalization.words,
                         ),
-                        const SizedBox(width: LayoutConstants.spaceMedium),
-                        Expanded(
-                          child: FilledButton(
-                            onPressed: _isSaving ? null : _saveForm,
-                            child: _isSaving
-                                ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : Text(_isEditMode ? 'Update' : 'Save'),
-                          ),
+                        const SizedBox(height: LayoutConstants.spaceXLarge),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: _isSaving
+                                    ? null
+                                    : () => context.pop(),
+                                child: const Text('Cancel'),
+                              ),
+                            ),
+                            const SizedBox(width: LayoutConstants.spaceMedium),
+                            Expanded(
+                              child: FilledButton(
+                                onPressed: _isSaving ? null : _saveForm,
+                                child: _isSaving
+                                    ? const SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : Text(_isEditMode ? 'Update' : 'Save'),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),

@@ -7,6 +7,7 @@ import 'package:stylemake/core/utils/snackbar_utils.dart';
 import 'package:stylemake/core/widgets/app_fab.dart';
 import 'package:stylemake/core/widgets/dialogs/confirm_dialog.dart';
 import 'package:stylemake/core/widgets/list_card_item.dart';
+import 'package:stylemake/core/widgets/responsive_center.dart';
 import 'package:stylemake/features/masters/providers/style_providers.dart';
 
 /// Style Master list screen
@@ -53,40 +54,44 @@ class StylesListScreen extends ConsumerWidget {
               return _buildNoResultsState(context, searchQuery);
             }
 
-            return ListView.builder(
-              padding: const EdgeInsets.all(LayoutConstants.paddingMedium),
-              itemCount: filteredStyles.length,
-              itemBuilder: (context, index) {
-                final style = filteredStyles[index];
-                return ListCardItem(
-                  title: style.name,
-                  subtitle:
-                      'Created: ${DateFormat('MMM dd, yyyy').format(style.createdAt)}',
-                  leading: CircleAvatar(
-                    child: Text(
-                      style.name.isNotEmpty ? style.name[0].toUpperCase() : 'S',
+            return ResponsiveListContainer(
+              child: ListView.builder(
+                padding: const EdgeInsets.all(LayoutConstants.paddingMedium),
+                itemCount: filteredStyles.length,
+                itemBuilder: (context, index) {
+                  final style = filteredStyles[index];
+                  return ListCardItem(
+                    title: style.name,
+                    subtitle:
+                        'Created: ${DateFormat('MMM dd, yyyy').format(style.createdAt)}',
+                    leading: CircleAvatar(
+                      child: Text(
+                        style.name.isNotEmpty
+                            ? style.name[0].toUpperCase()
+                            : 'S',
+                      ),
                     ),
-                  ),
-                  trailing: [
-                    IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: () {
-                        context.go('/masters/styles/${style.id}/edit');
-                      },
-                      tooltip: 'Edit',
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () =>
-                          _deleteStyle(context, ref, style.id, style.name),
-                      tooltip: 'Delete',
-                    ),
-                  ],
-                  onTap: () {
-                    // Could navigate to detail view in future
-                  },
-                );
-              },
+                    trailing: [
+                      IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () {
+                          context.push('/masters/styles/${style.id}/edit');
+                        },
+                        tooltip: 'Edit',
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () =>
+                            _deleteStyle(context, ref, style.id, style.name),
+                        tooltip: 'Delete',
+                      ),
+                    ],
+                    onTap: () {
+                      // Could navigate to detail view in future
+                    },
+                  );
+                },
+              ),
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -95,7 +100,7 @@ class StylesListScreen extends ConsumerWidget {
       ),
       floatingActionButton: AppFab(
         onPressed: () {
-          context.go('/masters/styles/add');
+          context.push('/masters/styles/add');
         },
         label: 'Add Style',
         icon: Icons.add,

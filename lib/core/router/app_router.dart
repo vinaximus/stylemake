@@ -5,6 +5,9 @@ import 'package:stylemake/features/masters/screens/styles/style_form_screen.dart
 import 'package:stylemake/features/masters/screens/styles/styles_list_screen.dart';
 import 'package:stylemake/features/masters/screens/vendors/vendor_form_screen.dart';
 import 'package:stylemake/features/masters/screens/vendors/vendors_list_screen.dart';
+import 'package:stylemake/features/production/screens/cuttings/cutting_detail_screen.dart';
+import 'package:stylemake/features/production/screens/cuttings/cutting_form_screen.dart';
+import 'package:stylemake/features/production/screens/cuttings/cuttings_list_screen.dart';
 import 'package:stylemake/features/production/screens/production_home_screen.dart';
 import 'package:stylemake/features/reports/screens/reports_home_screen.dart';
 
@@ -26,6 +29,12 @@ class AppRouter {
   static const String vendorsList = '/masters/vendors';
   static const String vendorsAdd = '/masters/vendors/add';
   static String vendorsEdit(String id) => '/masters/vendors/$id/edit';
+
+  // Cutting routes
+  static const String cuttingsList = '/production/cuttings';
+  static const String cuttingsAdd = '/production/cuttings/add';
+  static String cuttingsEdit(String id) => '/production/cuttings/$id/edit';
+  static String cuttingsDetail(String id) => '/production/cuttings/$id';
 
   /// Router configuration with ShellRoute for AppShell
   static final GoRouter router = GoRouter(
@@ -94,6 +103,37 @@ class AppRouter {
             pageBuilder: (context, state) {
               final id = state.pathParameters['id']!;
               return NoTransitionPage(child: VendorFormScreen(vendorId: id));
+            },
+          ),
+          // Cutting routes
+          GoRoute(
+            path: cuttingsList,
+            name: 'cuttingsList',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: CuttingsListScreen()),
+          ),
+          GoRoute(
+            path: cuttingsAdd,
+            name: 'cuttingsAdd',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: CuttingFormScreen()),
+          ),
+          GoRoute(
+            path: '/production/cuttings/:id/edit',
+            name: 'cuttingsEdit',
+            pageBuilder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return NoTransitionPage(child: CuttingFormScreen(cuttingId: id));
+            },
+          ),
+          GoRoute(
+            path: '/production/cuttings/:id',
+            name: 'cuttingsDetail',
+            pageBuilder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return NoTransitionPage(
+                child: CuttingDetailScreen(cuttingId: id),
+              );
             },
           ),
         ],
