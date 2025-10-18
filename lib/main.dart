@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:stylemake/core/router/app_router.dart';
 import 'package:stylemake/core/services/supabase_service.dart';
 import 'package:stylemake/core/theme/app_theme.dart';
-import 'package:stylemake/core/widgets/app_shell.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,15 +32,10 @@ class StylemakeApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final router = AppRouter.router;
-
     return MaterialApp.router(
       title: 'Stylemake v0.5',
       theme: AppTheme.lightTheme,
-      routerConfig: router,
-      builder: (context, child) {
-        return AppShell(child: child ?? const SizedBox.shrink());
-      },
+      routerConfig: AppRouter.router,
     );
   }
 }
