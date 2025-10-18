@@ -5,28 +5,28 @@ Below is a phased, minimal-step TODO list for **v0.5 (Production Module)**. Task
 
 ---
 
-## Phase 0 — Project initialization (very small, must be first)
-- [ ] **Create repo & branches**
+## Phase 0 — Project initialization (very small, must be first) ✅ COMPLETED
+- [x] **Create repo & branches**
   - Acceptance criteria:
-    - Git repo created (GitHub/GitLab).
-    - Branches: `main`, `develop`, `feature/*` exist.
-    - README with short project purpose present.
-- [ ] **Create Flutter project skeleton (web + mobile)**
+    - Git repo created (GitHub/GitLab). ✅
+    - Branches: `main`, `develop`, `feature/*` exist. ✅
+    - README with short project purpose present. ✅
+- [x] **Create Flutter project skeleton (web + mobile)**
   - Acceptance criteria:
-    - `flutter create` project exists and builds for `android`, `ios`, `web`.
-    - App runs on emulator/browser and shows placeholder home screen.
-- [ ] **Add core dependencies & scaffolding**
+    - `flutter create` project exists and builds for `android`, `ios`, `web`. ✅
+    - App runs on emulator/browser and shows placeholder home screen. ✅
+- [x] **Add core dependencies & scaffolding**
   - Acceptance criteria:
-    - `pubspec.yaml` includes Riverpod, Supabase client, Material 3 support, and routing package.
-    - App compiles without analyzer errors (except TODO comments).
-- [ ] **Configure environment & secrets (local dev)**
+    - `pubspec.yaml` includes Riverpod, Supabase client, Material 3 support, and routing package. ✅
+    - App compiles without analyzer errors (except TODO comments). ✅
+- [x] **Configure environment & secrets (local dev)**
   - Acceptance criteria:
-    - `.env.example` with keys (SUPABASE_URL, SUPABASE_ANON_KEY) added.
-    - `flutter_dotenv` (or chosen approach) integrated; app reads env without crashing.
-- [ ] **Project linting & formatting**
+    - `.env.example` with keys (SUPABASE_URL, SUPABASE_ANON_KEY) added. ✅
+    - `flutter_dotenv` (or chosen approach) integrated; app reads env without crashing. ✅
+- [x] **Project linting & formatting**
   - Acceptance criteria:
-    - `analysis_options.yaml` present.
-    - `flutter format`/`dart analyze` pass on added files.
+    - `analysis_options.yaml` present. ✅
+    - `flutter format`/`dart analyze` pass on added files. ✅
 
 ---
 
