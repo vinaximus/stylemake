@@ -46,19 +46,19 @@ Below is a phased, minimal-step TODO list for **v0.5 (Production Module)**. Task
 
 ---
 
-## Phase 2 — Shared UI components & navigation (Material 3)
-- [ ] **Implement AppShell & bottom navigation**
+## Phase 2 — Shared UI components & navigation (Material 3) ✅ COMPLETED
+- [x] **Implement AppShell & bottom navigation**
   - Acceptance criteria:
-    - Bottom nav shows tabs: Production, Masters (Style/Vendor), Reports.
-    - Navigation routes work on mobile & web.
-- [ ] **Create reusable Card list item & FAB**
+    - Bottom nav shows tabs: Production, Masters (Style/Vendor), Reports. ✅
+    - Navigation routes work on mobile & web. ✅
+- [x] **Create reusable Card list item & FAB**
   - Acceptance criteria:
-    - Card item component usable with title, subtitle, trailing actions.
-    - FAB appears on list pages and opens the Add form.
-- [ ] **Form component & validation utilities**
+    - Card item component usable with title, subtitle, trailing actions. ✅
+    - FAB appears on list pages and opens the Add form. ✅
+- [x] **Form component & validation utilities**
   - Acceptance criteria:
-    - Centralized form field widget with validation messages.
-    - Required field validations wired; invalid forms prevent submit and show errors.
+    - Centralized form field widget with validation messages. ✅
+    - Required field validations wired; invalid forms prevent submit and show errors. ✅
 
 ---
 
