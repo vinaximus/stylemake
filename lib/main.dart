@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Load environment variables
   try {
     await dotenv.load(fileName: '.env');
@@ -12,12 +12,8 @@ Future<void> main() async {
     // If .env doesn't exist, continue with default/empty values
     debugPrint('Warning: .env file not found. Using default configuration.');
   }
-  
-  runApp(
-    const ProviderScope(
-      child: StylemakeApp(),
-    ),
-  );
+
+  runApp(const ProviderScope(child: StylemakeApp()));
 }
 
 class StylemakeApp extends StatelessWidget {
@@ -62,16 +58,16 @@ class PlaceholderHomePage extends StatelessWidget {
             Text(
               'Stylemake',
               style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontWeight: FontWeight.bold,
-                  ),
+                color: Theme.of(context).colorScheme.primary,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               'Garment Manufacturing Management',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 48),
             const Card(

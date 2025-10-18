@@ -17,7 +17,7 @@ void main() {
     // Verify that the app title is present.
     expect(find.text('Stylemake'), findsOneWidget);
     expect(find.text('Garment Manufacturing Management'), findsOneWidget);
-    
+
     // Verify the placeholder message is present.
     expect(find.text('Production Module Coming Soon'), findsOneWidget);
   });
