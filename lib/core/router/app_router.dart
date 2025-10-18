@@ -1,6 +1,10 @@
 import 'package:go_router/go_router.dart';
 import 'package:stylemake/core/widgets/app_shell.dart';
 import 'package:stylemake/features/masters/screens/masters_home_screen.dart';
+import 'package:stylemake/features/masters/screens/styles/style_form_screen.dart';
+import 'package:stylemake/features/masters/screens/styles/styles_list_screen.dart';
+import 'package:stylemake/features/masters/screens/vendors/vendor_form_screen.dart';
+import 'package:stylemake/features/masters/screens/vendors/vendors_list_screen.dart';
 import 'package:stylemake/features/production/screens/production_home_screen.dart';
 import 'package:stylemake/features/reports/screens/reports_home_screen.dart';
 
@@ -12,6 +16,16 @@ class AppRouter {
   static const String production = '/';
   static const String masters = '/masters';
   static const String reports = '/reports';
+
+  // Style routes
+  static const String stylesList = '/masters/styles';
+  static const String stylesAdd = '/masters/styles/add';
+  static String stylesEdit(String id) => '/masters/styles/$id/edit';
+
+  // Vendor routes
+  static const String vendorsList = '/masters/vendors';
+  static const String vendorsAdd = '/masters/vendors/add';
+  static String vendorsEdit(String id) => '/masters/vendors/$id/edit';
 
   /// Router configuration with ShellRoute for AppShell
   static final GoRouter router = GoRouter(
@@ -39,6 +53,48 @@ class AppRouter {
             name: 'reports',
             pageBuilder: (context, state) =>
                 const NoTransitionPage(child: ReportsHomeScreen()),
+          ),
+          // Style routes
+          GoRoute(
+            path: stylesList,
+            name: 'stylesList',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: StylesListScreen()),
+          ),
+          GoRoute(
+            path: stylesAdd,
+            name: 'stylesAdd',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: StyleFormScreen()),
+          ),
+          GoRoute(
+            path: '/masters/styles/:id/edit',
+            name: 'stylesEdit',
+            pageBuilder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return NoTransitionPage(child: StyleFormScreen(styleId: id));
+            },
+          ),
+          // Vendor routes
+          GoRoute(
+            path: vendorsList,
+            name: 'vendorsList',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: VendorsListScreen()),
+          ),
+          GoRoute(
+            path: vendorsAdd,
+            name: 'vendorsAdd',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: VendorFormScreen()),
+          ),
+          GoRoute(
+            path: '/masters/vendors/:id/edit',
+            name: 'vendorsEdit',
+            pageBuilder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return NoTransitionPage(child: VendorFormScreen(vendorId: id));
+            },
           ),
         ],
       ),

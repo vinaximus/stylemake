@@ -15,9 +15,7 @@ void main() {
     WidgetTester tester,
   ) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(
-      const ProviderScope(child: StylemakeApp()),
-    );
+    await tester.pumpWidget(const ProviderScope(child: StylemakeApp()));
 
     // Wait for the initial frame and navigation
     await tester.pumpAndSettle();
@@ -35,9 +33,7 @@ void main() {
     WidgetTester tester,
   ) async {
     // Build our app
-    await tester.pumpWidget(
-      const ProviderScope(child: StylemakeApp()),
-    );
+    await tester.pumpWidget(const ProviderScope(child: StylemakeApp()));
     await tester.pumpAndSettle();
 
     // Tap on Masters tab

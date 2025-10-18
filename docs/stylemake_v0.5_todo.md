@@ -62,19 +62,19 @@ Below is a phased, minimal-step TODO list for **v0.5 (Production Module)**. Task
 
 ---
 
-## Phase 3 — Masters: Style Master & Vendor Master (CRUD)
-- [ ] **Style Master — Add/Edit/Delete/List**
+## Phase 3 — Masters: Style Master & Vendor Master (CRUD) ✅ COMPLETED
+- [x] **Style Master — Add/Edit/Delete/List**
   - Acceptance criteria:
-    - Create Style form saves to `styles`.
-    - Edit and Delete work with confirmation modal.
-    - List supports search & pagination.
-- [ ] **Vendor Master — Add/Edit/Delete/List**
+    - Create Style form saves to `styles`. ✅
+    - Edit and Delete work with confirmation modal. ✅
+    - List supports search & pagination. ✅
+- [x] **Vendor Master — Add/Edit/Delete/List**
   - Acceptance criteria:
-    - Vendor create form collects Vendor Name, GST, Address, City, PIN Code and stores in `vendors`.
-    - List can filter by City or Name.
-- [ ] **Master integration in dropdowns**
+    - Vendor create form collects Vendor Name, GST, Address, City, PIN Code and stores in `vendors`. ✅
+    - List can filter by City or Name. ✅
+- [x] **Master integration in dropdowns**
   - Acceptance criteria:
-    - Styles and Vendors populate dropdowns in other forms (Cutting, PO) instantly (or on refresh).
+    - Styles and Vendors populate dropdowns in other forms (Cutting, PO) instantly (or on refresh). ✅
 
 ---
 
