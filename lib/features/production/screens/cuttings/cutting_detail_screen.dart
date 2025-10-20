@@ -6,6 +6,7 @@ import 'package:stylemake/core/constants/layout_constants.dart';
 import 'package:stylemake/core/router/app_router.dart';
 import 'package:stylemake/core/widgets/responsive_center.dart';
 import 'package:stylemake/features/production/providers/cutting_providers.dart';
+import 'package:stylemake/features/production/providers/issue_providers.dart';
 import 'package:stylemake/features/production/providers/po_providers.dart';
 
 /// Cutting detail screen showing cutting information and linked POs
@@ -293,6 +294,10 @@ class CuttingDetailScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
+                  const SizedBox(height: LayoutConstants.spaceLarge),
+
+                  // Item Issues Section (Phase 6)
+                  _IssuesSection(cuttingId: cuttingId),
                 ],
               ),
             ),
@@ -366,6 +371,214 @@ class CuttingDetailScreen extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _IssuesSection extends ConsumerWidget {
+  const _IssuesSection({required this.cuttingId});
+
+  final String cuttingId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final issuesAsync = ref.watch(issuesByCuttingProvider(cuttingId));
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(LayoutConstants.paddingLarge),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Item Issues',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const Divider(height: 24),
+            issuesAsync.when(
+              data: (issues) {
+                if (issues.isEmpty) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(
+                        LayoutConstants.paddingLarge,
+                      ),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.inventory_outlined,
+                            size: 64,
+                            color: theme.colorScheme.outline,
+                          ),
+                          const SizedBox(height: LayoutConstants.spaceMedium),
+                          Text(
+                            'No issues recorded yet',
+                            style: theme.textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: LayoutConstants.spaceSmall),
+                          Text(
+                            'Issues will appear here when items are issued for linked POs',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
+                // Calculate grand total
+                final grandTotal = issues.fold<double>(
+                  0,
+                  (sum, issue) => sum + issue.totalAmount,
+                );
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${issues.length} ${issues.length == 1 ? 'Issue' : 'Issues'} recorded',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: LayoutConstants.spaceSmall),
+                    // Issues cards
+                    ...issues.map(
+                      (issue) => Padding(
+                        padding: const EdgeInsets.only(
+                          bottom: LayoutConstants.spaceSmall,
+                        ),
+                        child: InkWell(
+                          onTap: () {
+                            context.push(AppRouter.issuesEdit(issue.id));
+                          },
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: theme.colorScheme.outline.withOpacity(
+                                  0.5,
+                                ),
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.inventory_2,
+                                  size: 20,
+                                  color: theme.colorScheme.primary,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        issue.itemDescription,
+                                        style: theme.textTheme.titleSmall
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'PO: ${issue.poNumber}',
+                                        style: theme.textTheme.bodySmall,
+                                      ),
+                                      Text(
+                                        'Qty: ${issue.quantity} × ₹${issue.rate.toStringAsFixed(2)} = ₹${issue.totalAmount.toStringAsFixed(2)}',
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(
+                                              color: theme
+                                                  .colorScheme
+                                                  .onSurfaceVariant,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.chevron_right,
+                                  color: theme.colorScheme.outline,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const Divider(height: 24),
+                    // Grand total
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Total Issues Amount',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          '₹${grandTotal.toStringAsFixed(2)}',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+              },
+              loading: () => const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(LayoutConstants.paddingLarge),
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+              error: (error, stack) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(LayoutConstants.paddingLarge),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: 48,
+                        color: theme.colorScheme.error,
+                      ),
+                      const SizedBox(height: LayoutConstants.spaceMedium),
+                      Text(
+                        'Error loading issues',
+                        style: theme.textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: LayoutConstants.spaceSmall),
+                      Text(
+                        error.toString(),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

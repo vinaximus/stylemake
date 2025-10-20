@@ -19,7 +19,7 @@ class FabricationPoRepository {
           .select('''
             *,
             cuttings!inner(cutting_ref, style_id, styles!inner(name)),
-            vendors!inner(name, gst_number, city)
+            vendors!inner(name, gst, city)
           ''')
           .eq('company_id', _companyId)
           .order('created_at', ascending: false);
@@ -40,7 +40,7 @@ class FabricationPoRepository {
           .select('''
             *,
             cuttings!inner(cutting_ref, style_id, styles!inner(name)),
-            vendors!inner(name, gst_number, city, address)
+            vendors!inner(name, gst, city, address)
           ''')
           .eq('id', id)
           .eq('company_id', _companyId)
@@ -64,7 +64,7 @@ class FabricationPoRepository {
           .select('''
             *,
             cuttings!inner(cutting_ref, style_id, styles!inner(name)),
-            vendors!inner(name, gst_number, city)
+            vendors!inner(name, gst, city)
           ''')
           .eq('cutting_id', cuttingId)
           .eq('company_id', _companyId)
@@ -86,7 +86,7 @@ class FabricationPoRepository {
           .select('''
             *,
             cuttings!inner(cutting_ref, style_id, styles!inner(name)),
-            vendors!inner(name, gst_number, city)
+            vendors!inner(name, gst, city)
           ''')
           .eq('vendor_id', vendorId)
           .eq('company_id', _companyId)
@@ -108,7 +108,7 @@ class FabricationPoRepository {
           .select('''
             *,
             cuttings!inner(cutting_ref, style_id, styles!inner(name)),
-            vendors!inner(name, gst_number, city)
+            vendors!inner(name, gst, city)
           ''')
           .eq('fabrication_type', type)
           .eq('company_id', _companyId)
@@ -133,7 +133,7 @@ class FabricationPoRepository {
           .select('''
             *,
             cuttings!inner(cutting_ref, style_id, styles!inner(name)),
-            vendors!inner(name, gst_number, city)
+            vendors!inner(name, gst, city)
           ''')
           .gte('date_of_issue', startDate.toIso8601String().split('T')[0])
           .lte('date_of_issue', endDate.toIso8601String().split('T')[0])

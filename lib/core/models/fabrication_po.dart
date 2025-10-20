@@ -185,7 +185,7 @@ class FabricationPoWithDetails extends FabricationPo {
       cuttingRef: cutting?['cutting_ref'] as String? ?? 'Unknown',
       vendorName: vendor?['name'] as String? ?? 'Unknown',
       styleName: style?['name'] as String? ?? 'Unknown',
-      vendorGst: vendor?['gst_number'] as String?,
+      vendorGst: vendor?['gst'] as String?,
       vendorCity: vendor?['city'] as String?,
     );
   }

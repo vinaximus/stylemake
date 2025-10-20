@@ -8,6 +8,8 @@ import 'package:stylemake/features/masters/screens/vendors/vendors_list_screen.d
 import 'package:stylemake/features/production/screens/cuttings/cutting_detail_screen.dart';
 import 'package:stylemake/features/production/screens/cuttings/cutting_form_screen.dart';
 import 'package:stylemake/features/production/screens/cuttings/cuttings_list_screen.dart';
+import 'package:stylemake/features/production/screens/issues/issue_form_screen.dart';
+import 'package:stylemake/features/production/screens/issues/issues_list_screen.dart';
 import 'package:stylemake/features/production/screens/pos/po_detail_screen.dart';
 import 'package:stylemake/features/production/screens/pos/po_form_screen.dart';
 import 'package:stylemake/features/production/screens/pos/pos_list_screen.dart';
@@ -44,6 +46,11 @@ class AppRouter {
   static const String posAdd = '/production/pos/add';
   static String posEditPath(String id) => '/production/pos/$id/edit';
   static String posDetailPath(String id) => '/production/pos/$id';
+
+  // Issue routes
+  static const String issuesList = '/production/issues';
+  static const String issuesAdd = '/production/issues/add';
+  static String issuesEdit(String id) => '/production/issues/$id/edit';
 
   /// Router configuration with ShellRoute for AppShell
   static final GoRouter router = GoRouter(
@@ -176,6 +183,29 @@ class AppRouter {
             pageBuilder: (context, state) {
               final id = state.pathParameters['id']!;
               return NoTransitionPage(child: PoDetailScreen(poId: id));
+            },
+          ),
+          // Issue routes
+          GoRoute(
+            path: issuesList,
+            name: 'issuesList',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: IssuesListScreen()),
+          ),
+          GoRoute(
+            path: issuesAdd,
+            name: 'issuesAdd',
+            pageBuilder: (context, state) {
+              final poId = state.uri.queryParameters['poId'];
+              return NoTransitionPage(child: IssueFormScreen(poId: poId));
+            },
+          ),
+          GoRoute(
+            path: '/production/issues/:id/edit',
+            name: 'issuesEdit',
+            pageBuilder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return NoTransitionPage(child: IssueFormScreen(issueId: id));
             },
           ),
         ],

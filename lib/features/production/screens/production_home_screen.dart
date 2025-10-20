@@ -61,12 +61,13 @@ class ProductionHomeScreen extends StatelessWidget {
               const SizedBox(height: LayoutConstants.spaceSmall),
               Card(
                 child: ListTile(
-                  leading: const Icon(Icons.inventory),
+                  leading: const Icon(Icons.inventory_2),
                   title: const Text('Item Issues'),
-                  subtitle: const Text('Coming in Phase 6'),
+                  subtitle: const Text('Track items issued against POs'),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: null,
-                  enabled: false,
+                  onTap: () {
+                    context.push(AppRouter.issuesList);
+                  },
                 ),
               ),
               const SizedBox(height: LayoutConstants.spaceSmall),
