@@ -153,19 +153,22 @@ Below is a phased, minimal-step TODO list for **v0.5 (Production Module)**. Task
 
 ---
 
-## Phase 7 — Bills issued against PO (supplier invoices)
+## Phase 7 — Bills issued against PO (supplier invoices) ✅ COMPLETED
 
-- [ ] **Bill — Create form & auto-calc**
+- [X] **Bill — Create form & auto-calc**
   - Acceptance criteria:
-    - Fields: Supplier Invoice No, Invoice Date, Related PO, Qty, Rate, Notes.
-    - Total auto-calculated (Qty × Rate) and displayed.
-- [ ] **Bill — Edit/Delete & link**
+    - Fields: Supplier Invoice No, Invoice Date, Related PO, Qty, Rate, Notes. ✅
+    - Total auto-calculated (Qty × Rate) and displayed. ✅
+- [X] **Bill — Edit/Delete & link**
   - Acceptance criteria:
-    - Bills editable/deletable and linked to PO.
-    - Bill list shows supplier, PO ref, invoice date, total.
-- [ ] **Bill summary per vendor**
+    - Bills editable/deletable and linked to PO. ✅
+    - Bill list shows supplier, PO ref, invoice date, total. ✅
+- [X] **Bill summary per PO**
   - Acceptance criteria:
-    - Vendor detail page shows aggregated bills (count + sum) for selected date range.
+    - PO detail page shows bills related to that PO. ✅
+- [X] **Bill summary per Cutting**
+  - Acceptance criteria:
+    - Cutting detail page shows bills related to that cutting. ✅
 
 ---
 

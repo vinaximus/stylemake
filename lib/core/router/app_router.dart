@@ -5,6 +5,8 @@ import 'package:stylemake/features/masters/screens/styles/style_form_screen.dart
 import 'package:stylemake/features/masters/screens/styles/styles_list_screen.dart';
 import 'package:stylemake/features/masters/screens/vendors/vendor_form_screen.dart';
 import 'package:stylemake/features/masters/screens/vendors/vendors_list_screen.dart';
+import 'package:stylemake/features/production/screens/bills/bill_form_screen.dart';
+import 'package:stylemake/features/production/screens/bills/bills_list_screen.dart';
 import 'package:stylemake/features/production/screens/cuttings/cutting_detail_screen.dart';
 import 'package:stylemake/features/production/screens/cuttings/cutting_form_screen.dart';
 import 'package:stylemake/features/production/screens/cuttings/cuttings_list_screen.dart';
@@ -51,6 +53,11 @@ class AppRouter {
   static const String issuesList = '/production/issues';
   static const String issuesAdd = '/production/issues/add';
   static String issuesEdit(String id) => '/production/issues/$id/edit';
+
+  // Bill routes
+  static const String billsList = '/production/bills';
+  static const String billsAdd = '/production/bills/add';
+  static String billsEdit(String id) => '/production/bills/$id/edit';
 
   /// Router configuration with ShellRoute for AppShell
   static final GoRouter router = GoRouter(
@@ -206,6 +213,29 @@ class AppRouter {
             pageBuilder: (context, state) {
               final id = state.pathParameters['id']!;
               return NoTransitionPage(child: IssueFormScreen(issueId: id));
+            },
+          ),
+          // Bill routes
+          GoRoute(
+            path: billsList,
+            name: 'billsList',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: BillsListScreen()),
+          ),
+          GoRoute(
+            path: billsAdd,
+            name: 'billsAdd',
+            pageBuilder: (context, state) {
+              final poId = state.uri.queryParameters['poId'];
+              return NoTransitionPage(child: BillFormScreen(poId: poId));
+            },
+          ),
+          GoRoute(
+            path: '/production/bills/:id/edit',
+            name: 'billsEdit',
+            pageBuilder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return NoTransitionPage(child: BillFormScreen(billId: id));
             },
           ),
         ],

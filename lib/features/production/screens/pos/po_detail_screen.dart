@@ -7,6 +7,7 @@ import 'package:stylemake/core/router/app_router.dart';
 import 'package:stylemake/core/utils/pdf_generator.dart';
 import 'package:stylemake/core/utils/snackbar_utils.dart';
 import 'package:stylemake/core/widgets/responsive_center.dart';
+import 'package:stylemake/features/production/providers/bill_providers.dart';
 import 'package:stylemake/features/production/providers/issue_providers.dart';
 import 'package:stylemake/features/production/providers/po_providers.dart';
 
@@ -304,6 +305,11 @@ class PoDetailScreen extends ConsumerWidget {
 
                   // Linked Issues Section
                   _IssuesSection(poId: poId),
+
+                  const SizedBox(height: LayoutConstants.spaceLarge),
+
+                  // Bills Section
+                  _BillsSection(poId: poId),
                 ],
               ),
             ),
@@ -615,6 +621,237 @@ class _IssuesSection extends ConsumerWidget {
                       const SizedBox(height: LayoutConstants.spaceMedium),
                       Text(
                         'Error loading issues',
+                        style: theme.textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: LayoutConstants.spaceSmall),
+                      Text(
+                        error.toString(),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BillsSection extends ConsumerWidget {
+  const _BillsSection({required this.poId});
+
+  final String poId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final billsAsync = ref.watch(billsByPoProvider(poId));
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(LayoutConstants.paddingLarge),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Bills',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                FilledButton.tonalIcon(
+                  onPressed: () {
+                    context.push('${AppRouter.billsAdd}?poId=$poId');
+                  },
+                  icon: const Icon(Icons.add, size: 18),
+                  label: const Text('Add Bill'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const Divider(height: 24),
+            billsAsync.when(
+              data: (bills) {
+                if (bills.isEmpty) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(
+                        LayoutConstants.paddingLarge,
+                      ),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.request_quote_outlined,
+                            size: 64,
+                            color: theme.colorScheme.outline,
+                          ),
+                          const SizedBox(height: LayoutConstants.spaceMedium),
+                          Text(
+                            'No bills recorded yet',
+                            style: theme.textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: LayoutConstants.spaceSmall),
+                          Text(
+                            'Click "Add Bill" to record supplier invoices for this PO',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
+                // Calculate grand total
+                final grandTotal = bills.fold<double>(
+                  0,
+                  (sum, bill) => sum + bill.totalAmount,
+                );
+
+                return Column(
+                  children: [
+                    // Bills list
+                    ...bills.map((bill) {
+                      return Card(
+                        margin: const EdgeInsets.only(
+                          bottom: LayoutConstants.spaceSmall,
+                        ),
+                        color: theme.colorScheme.surfaceVariant.withOpacity(
+                          0.3,
+                        ),
+                        child: InkWell(
+                          onTap: () {
+                            context.push(AppRouter.billsEdit(bill.id));
+                          },
+                          borderRadius: BorderRadius.circular(
+                            LayoutConstants.radiusMedium,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(
+                              LayoutConstants.paddingMedium,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        bill.supplierInvoiceNo,
+                                        style: theme.textTheme.titleSmall
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                      ),
+                                    ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          DateFormat(
+                                            'dd/MM/yyyy',
+                                          ).format(bill.invoiceDate),
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(
+                                                color: theme
+                                                    .colorScheme
+                                                    .onSurfaceVariant,
+                                              ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Icon(
+                                          Icons.chevron_right,
+                                          size: 20,
+                                          color: theme.colorScheme.outline,
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Qty: ${bill.quantity} × ₹${bill.rate.toStringAsFixed(2)}',
+                                      style: theme.textTheme.bodyMedium,
+                                    ),
+                                    Text(
+                                      '₹${bill.totalAmount.toStringAsFixed(2)}',
+                                      style: theme.textTheme.titleMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: theme.colorScheme.primary,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                    const Divider(height: 24),
+                    // Grand total
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Total Bills Amount',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          '₹${grandTotal.toStringAsFixed(2)}',
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+              },
+              loading: () => const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(LayoutConstants.paddingLarge),
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+              error: (error, stack) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(LayoutConstants.paddingLarge),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: 48,
+                        color: theme.colorScheme.error,
+                      ),
+                      const SizedBox(height: LayoutConstants.spaceMedium),
+                      Text(
+                        'Error loading bills',
                         style: theme.textTheme.titleMedium,
                       ),
                       const SizedBox(height: LayoutConstants.spaceSmall),

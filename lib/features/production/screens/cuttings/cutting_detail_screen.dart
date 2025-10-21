@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:stylemake/core/constants/layout_constants.dart';
 import 'package:stylemake/core/router/app_router.dart';
 import 'package:stylemake/core/widgets/responsive_center.dart';
+import 'package:stylemake/features/production/providers/bill_providers.dart';
 import 'package:stylemake/features/production/providers/cutting_providers.dart';
 import 'package:stylemake/features/production/providers/issue_providers.dart';
 import 'package:stylemake/features/production/providers/po_providers.dart';
@@ -298,6 +299,11 @@ class CuttingDetailScreen extends ConsumerWidget {
 
                   // Item Issues Section (Phase 6)
                   _IssuesSection(cuttingId: cuttingId),
+
+                  const SizedBox(height: LayoutConstants.spaceLarge),
+
+                  // Bills Section (Phase 7)
+                  _BillsSection(cuttingId: cuttingId),
                 ],
               ),
             ),
@@ -561,6 +567,212 @@ class _IssuesSection extends ConsumerWidget {
                       const SizedBox(height: LayoutConstants.spaceMedium),
                       Text(
                         'Error loading issues',
+                        style: theme.textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: LayoutConstants.spaceSmall),
+                      Text(
+                        error.toString(),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BillsSection extends ConsumerWidget {
+  const _BillsSection({required this.cuttingId});
+
+  final String cuttingId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final billsAsync = ref.watch(billsByCuttingProvider(cuttingId));
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(LayoutConstants.paddingLarge),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Bills',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const Divider(height: 24),
+            billsAsync.when(
+              data: (bills) {
+                if (bills.isEmpty) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(
+                        LayoutConstants.paddingLarge,
+                      ),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.request_quote_outlined,
+                            size: 64,
+                            color: theme.colorScheme.outline,
+                          ),
+                          const SizedBox(height: LayoutConstants.spaceMedium),
+                          Text(
+                            'No bills recorded yet',
+                            style: theme.textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: LayoutConstants.spaceSmall),
+                          Text(
+                            'Bills will appear here when invoices are recorded for linked POs',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
+                // Calculate grand total
+                final grandTotal = bills.fold<double>(
+                  0,
+                  (sum, bill) => sum + bill.totalAmount,
+                );
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${bills.length} ${bills.length == 1 ? 'Bill' : 'Bills'} recorded',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: LayoutConstants.spaceSmall),
+                    // Bills cards
+                    ...bills.map(
+                      (bill) => Padding(
+                        padding: const EdgeInsets.only(
+                          bottom: LayoutConstants.spaceSmall,
+                        ),
+                        child: InkWell(
+                          onTap: () {
+                            context.push(AppRouter.billsEdit(bill.id));
+                          },
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: theme.colorScheme.outline.withOpacity(
+                                  0.5,
+                                ),
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.request_quote,
+                                  size: 20,
+                                  color: theme.colorScheme.primary,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        bill.supplierInvoiceNo,
+                                        style: theme.textTheme.titleSmall
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'PO: ${bill.poNumber} • ${bill.vendorName}',
+                                        style: theme.textTheme.bodySmall,
+                                      ),
+                                      Text(
+                                        'Qty: ${bill.quantity} × ₹${bill.rate.toStringAsFixed(2)} = ₹${bill.totalAmount.toStringAsFixed(2)}',
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(
+                                              color: theme
+                                                  .colorScheme
+                                                  .onSurfaceVariant,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.chevron_right,
+                                  color: theme.colorScheme.outline,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const Divider(height: 24),
+                    // Grand total
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Total Bills Amount',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          '₹${grandTotal.toStringAsFixed(2)}',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+              },
+              loading: () => const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(LayoutConstants.paddingLarge),
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+              error: (error, stack) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(LayoutConstants.paddingLarge),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: 48,
+                        color: theme.colorScheme.error,
+                      ),
+                      const SizedBox(height: LayoutConstants.spaceMedium),
+                      Text(
+                        'Error loading bills',
                         style: theme.textTheme.titleMedium,
                       ),
                       const SizedBox(height: LayoutConstants.spaceSmall),
