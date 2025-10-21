@@ -10,6 +10,7 @@ import 'package:stylemake/core/utils/snackbar_utils.dart';
 import 'package:stylemake/core/widgets/app_fab.dart';
 import 'package:stylemake/core/widgets/dialogs/confirm_dialog.dart';
 import 'package:stylemake/core/widgets/responsive_center.dart';
+import 'package:stylemake/features/masters/providers/vendor_providers.dart';
 import 'package:stylemake/features/production/providers/po_providers.dart';
 
 /// Purchase Orders list screen
@@ -25,6 +26,7 @@ class PosListScreen extends ConsumerWidget {
     final typeFilter = ref.watch(poTypeFilterProvider);
     final dateRange = ref.watch(poDateRangeProvider);
     final vendorsDropdown = ref.watch(vendorsDropdownProvider);
+    final vendorsAsync = ref.watch(vendorsListProvider);
 
     final hasActiveFilters =
         vendorFilter != null || typeFilter != null || dateRange != null;
@@ -48,7 +50,7 @@ class PosListScreen extends ConsumerWidget {
                 ),
                 child: TextField(
                   decoration: const InputDecoration(
-                    hintText: 'Search by PO No, Job Order, or Vendor...',
+                    hintText: 'Search POs...',
                     prefixIcon: Icon(Icons.search),
                     border: OutlineInputBorder(),
                   ),
@@ -74,17 +76,35 @@ class PosListScreen extends ConsumerWidget {
                           border: OutlineInputBorder(),
                           isDense: true,
                           contentPadding: EdgeInsets.symmetric(
-                            horizontal: 12,
+                            horizontal: 8,
                             vertical: 8,
                           ),
                         ),
+                        isExpanded: true,
+                        menuMaxHeight: 300,
                         items: [
                           const DropdownMenuItem(
                             value: null,
-                            child: Text('All Vendors'),
+                            child: Text('All', overflow: TextOverflow.ellipsis),
                           ),
                           ...vendorsDropdown,
                         ],
+                        selectedItemBuilder: (BuildContext context) {
+                          return [
+                            const Text('All', overflow: TextOverflow.ellipsis),
+                            ...vendorsAsync.maybeWhen(
+                              data: (vendors) => vendors
+                                  .map(
+                                    (vendor) => Text(
+                                      vendor.name,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  )
+                                  .toList(),
+                              orElse: () => [],
+                            ),
+                          ];
+                        },
                         onChanged: (value) {
                           ref.read(poVendorFilterProvider.notifier).state =
                               value;
@@ -101,24 +121,42 @@ class PosListScreen extends ConsumerWidget {
                           border: OutlineInputBorder(),
                           isDense: true,
                           contentPadding: EdgeInsets.symmetric(
-                            horizontal: 12,
+                            horizontal: 8,
                             vertical: 8,
                           ),
                         ),
+                        isExpanded: true,
+                        menuMaxHeight: 300,
                         items: const [
                           DropdownMenuItem(
                             value: null,
-                            child: Text('All Types'),
+                            child: Text('All', overflow: TextOverflow.ellipsis),
                           ),
                           DropdownMenuItem(
                             value: 'Embroidery',
-                            child: Text('Embroidery'),
+                            child: Text(
+                              'Embroidery',
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                           DropdownMenuItem(
                             value: 'Stitching & Finishing',
-                            child: Text('Stitching & Finishing'),
+                            child: Text(
+                              'Stitching & Finishing',
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         ],
+                        selectedItemBuilder: (BuildContext context) {
+                          return const [
+                            Text('All', overflow: TextOverflow.ellipsis),
+                            Text('Embroidery', overflow: TextOverflow.ellipsis),
+                            Text(
+                              'Stitching & Finishing',
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ];
+                        },
                         onChanged: (value) {
                           ref.read(poTypeFilterProvider.notifier).state = value;
                         },
@@ -149,12 +187,15 @@ class PosListScreen extends ConsumerWidget {
                                 picked;
                           }
                         },
-                        icon: const Icon(Icons.date_range, size: 18),
-                        label: Text(
-                          dateRange == null
-                              ? 'Date Range'
-                              : '${DateFormat('dd/MM/yy').format(dateRange.start)} - ${DateFormat('dd/MM/yy').format(dateRange.end)}',
-                          style: const TextStyle(fontSize: 12),
+                        icon: const Icon(Icons.date_range, size: 16),
+                        label: Flexible(
+                          child: Text(
+                            dateRange == null
+                                ? 'Date Range'
+                                : '${DateFormat('dd/MM/yy').format(dateRange.start)}-${DateFormat('dd/MM/yy').format(dateRange.end)}',
+                            style: const TextStyle(fontSize: 11),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       ),
                     ),

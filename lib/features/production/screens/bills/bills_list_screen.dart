@@ -40,7 +40,10 @@ class BillsListScreen extends ConsumerWidget {
           .map(
             (po) => DropdownMenuItem(
               value: po.id,
-              child: Text('${po.poNumber} - ${po.vendorName}'),
+              child: Text(
+                '${po.poNumber} - ${po.vendorName}',
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           )
           .toList(),
@@ -59,8 +62,10 @@ class BillsListScreen extends ConsumerWidget {
         }
         return uniqueVendors.entries
             .map(
-              (entry) =>
-                  DropdownMenuItem(value: entry.key, child: Text(entry.value)),
+              (entry) => DropdownMenuItem(
+                value: entry.key,
+                child: Text(entry.value, overflow: TextOverflow.ellipsis),
+              ),
             )
             .toList();
       },
@@ -82,7 +87,7 @@ class BillsListScreen extends ConsumerWidget {
                 ),
                 child: TextField(
                   decoration: const InputDecoration(
-                    hintText: 'Search by invoice number, PO, or vendor...',
+                    hintText: 'Search bills...',
                     prefixIcon: Icon(Icons.search),
                     border: OutlineInputBorder(),
                   ),
@@ -108,17 +113,35 @@ class BillsListScreen extends ConsumerWidget {
                           border: OutlineInputBorder(),
                           isDense: true,
                           contentPadding: EdgeInsets.symmetric(
-                            horizontal: 12,
+                            horizontal: 8,
                             vertical: 8,
                           ),
                         ),
+                        isExpanded: true,
+                        menuMaxHeight: 300,
                         items: [
                           const DropdownMenuItem(
                             value: null,
-                            child: Text('All POs'),
+                            child: Text('All', overflow: TextOverflow.ellipsis),
                           ),
                           ...poDropdownItems,
                         ],
+                        selectedItemBuilder: (BuildContext context) {
+                          return [
+                            const Text('All', overflow: TextOverflow.ellipsis),
+                            ...posAsync.maybeWhen(
+                              data: (pos) => pos
+                                  .map(
+                                    (po) => Text(
+                                      '${po.poNumber} - ${po.vendorName}',
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  )
+                                  .toList(),
+                              orElse: () => [],
+                            ),
+                          ];
+                        },
                         onChanged: (value) {
                           ref.read(billPoFilterProvider.notifier).state = value;
                         },
@@ -134,17 +157,44 @@ class BillsListScreen extends ConsumerWidget {
                           border: OutlineInputBorder(),
                           isDense: true,
                           contentPadding: EdgeInsets.symmetric(
-                            horizontal: 12,
+                            horizontal: 8,
                             vertical: 8,
                           ),
                         ),
+                        isExpanded: true,
+                        menuMaxHeight: 300,
                         items: [
                           const DropdownMenuItem(
                             value: null,
-                            child: Text('All Vendors'),
+                            child: Text('All', overflow: TextOverflow.ellipsis),
                           ),
                           ...vendorDropdownItems,
                         ],
+                        selectedItemBuilder: (BuildContext context) {
+                          return [
+                            const Text('All', overflow: TextOverflow.ellipsis),
+                            ...billsAsync.maybeWhen(
+                              data: (bills) {
+                                final uniqueVendors = <String, String>{};
+                                for (final bill in bills) {
+                                  if (bill.vendorId != null) {
+                                    uniqueVendors[bill.vendorId!] =
+                                        bill.vendorName;
+                                  }
+                                }
+                                return uniqueVendors.entries
+                                    .map(
+                                      (entry) => Text(
+                                        entry.value,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    )
+                                    .toList();
+                              },
+                              orElse: () => [],
+                            ),
+                          ];
+                        },
                         onChanged: (value) {
                           ref.read(billVendorFilterProvider.notifier).state =
                               value;
@@ -177,11 +227,14 @@ class BillsListScreen extends ConsumerWidget {
                           }
                         },
                         icon: const Icon(Icons.date_range, size: 16),
-                        label: Text(
-                          dateRange == null
-                              ? 'Date Range'
-                              : '${DateFormat('dd/MM/yy').format(dateRange.start)}-${DateFormat('dd/MM/yy').format(dateRange.end)}',
-                          style: const TextStyle(fontSize: 11),
+                        label: Flexible(
+                          child: Text(
+                            dateRange == null
+                                ? 'Date Range'
+                                : '${DateFormat('dd/MM/yy').format(dateRange.start)}-${DateFormat('dd/MM/yy').format(dateRange.end)}',
+                            style: const TextStyle(fontSize: 11),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(
@@ -346,19 +399,24 @@ class _BillCard extends ConsumerWidget {
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
                     ),
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        Chip(
-                          label: Text(
-                            bill.poNumber,
-                            style: const TextStyle(fontSize: 11),
+                        Flexible(
+                          child: Chip(
+                            label: Text(
+                              bill.poNumber,
+                              style: const TextStyle(fontSize: 11),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                            visualDensity: VisualDensity.compact,
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
                           ),
-                          materialTapTargetSize:
-                              MaterialTapTargetSize.shrinkWrap,
-                          visualDensity: VisualDensity.compact,
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
                         ),
                         const SizedBox(width: 8),
                         Expanded(
@@ -377,46 +435,63 @@ class _BillCard extends ConsumerWidget {
                         color: theme.colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w500,
                       ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
                     ),
                   ],
                 ),
               ),
-              IconButton(
-                icon: const Icon(Icons.edit, size: 20),
-                onPressed: () {
-                  context.push(AppRouter.billsEdit(bill.id));
-                },
-                tooltip: 'Edit',
-              ),
-              IconButton(
-                icon: const Icon(Icons.delete, size: 20),
-                onPressed: () async {
-                  final confirmed = await showDeleteConfirmDialog(
-                    context: context,
-                    itemName: bill.supplierInvoiceNo,
-                  );
-                  if (confirmed && context.mounted) {
-                    try {
-                      final repository = ref.read(billRepositoryProvider);
-                      await repository.deleteBill(bill.id);
-                      ref.invalidate(billsListProvider);
-                      if (context.mounted) {
-                        SnackbarUtils.showSuccess(
-                          context,
-                          'Bill deleted successfully',
-                        );
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.edit, size: 20),
+                    onPressed: () {
+                      context.push(AppRouter.billsEdit(bill.id));
+                    },
+                    tooltip: 'Edit',
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 40,
+                      minHeight: 40,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete, size: 20),
+                    onPressed: () async {
+                      final confirmed = await showDeleteConfirmDialog(
+                        context: context,
+                        itemName: bill.supplierInvoiceNo,
+                      );
+                      if (confirmed && context.mounted) {
+                        try {
+                          final repository = ref.read(billRepositoryProvider);
+                          await repository.deleteBill(bill.id);
+                          ref.invalidate(billsListProvider);
+                          if (context.mounted) {
+                            SnackbarUtils.showSuccess(
+                              context,
+                              'Bill deleted successfully',
+                            );
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            SnackbarUtils.showError(
+                              context,
+                              'Failed to delete bill: ${e.toString()}',
+                            );
+                          }
+                        }
                       }
-                    } catch (e) {
-                      if (context.mounted) {
-                        SnackbarUtils.showError(
-                          context,
-                          'Failed to delete bill: ${e.toString()}',
-                        );
-                      }
-                    }
-                  }
-                },
-                tooltip: 'Delete',
+                    },
+                    tooltip: 'Delete',
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 40,
+                      minHeight: 40,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

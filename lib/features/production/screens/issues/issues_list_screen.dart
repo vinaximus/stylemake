@@ -37,7 +37,10 @@ class IssuesListScreen extends ConsumerWidget {
           .map(
             (po) => DropdownMenuItem(
               value: po.id,
-              child: Text('${po.poNumber} - ${po.vendorName}'),
+              child: Text(
+                '${po.poNumber} - ${po.vendorName}',
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           )
           .toList(),
@@ -59,7 +62,7 @@ class IssuesListScreen extends ConsumerWidget {
                 ),
                 child: TextField(
                   decoration: const InputDecoration(
-                    hintText: 'Search by item description or PO number...',
+                    hintText: 'Search issues...',
                     prefixIcon: Icon(Icons.search),
                     border: OutlineInputBorder(),
                   ),
@@ -82,21 +85,39 @@ class IssuesListScreen extends ConsumerWidget {
                       child: DropdownButtonFormField<String>(
                         value: poFilter,
                         decoration: const InputDecoration(
-                          labelText: 'Purchase Order',
+                          labelText: 'PO',
                           border: OutlineInputBorder(),
                           isDense: true,
                           contentPadding: EdgeInsets.symmetric(
-                            horizontal: 12,
+                            horizontal: 8,
                             vertical: 8,
                           ),
                         ),
+                        isExpanded: true,
+                        menuMaxHeight: 300,
                         items: [
                           const DropdownMenuItem(
                             value: null,
-                            child: Text('All POs'),
+                            child: Text('All', overflow: TextOverflow.ellipsis),
                           ),
                           ...poDropdownItems,
                         ],
+                        selectedItemBuilder: (BuildContext context) {
+                          return [
+                            const Text('All', overflow: TextOverflow.ellipsis),
+                            ...posAsync.maybeWhen(
+                              data: (pos) => pos
+                                  .map(
+                                    (po) => Text(
+                                      '${po.poNumber} - ${po.vendorName}',
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  )
+                                  .toList(),
+                              orElse: () => [],
+                            ),
+                          ];
+                        },
                         onChanged: (value) {
                           ref.read(issuePoFilterProvider.notifier).state =
                               value;
@@ -120,11 +141,14 @@ class IssuesListScreen extends ConsumerWidget {
                           }
                         },
                         icon: const Icon(Icons.date_range, size: 16),
-                        label: Text(
-                          dateRange == null
-                              ? 'Date'
-                              : '${DateFormat('dd/MM/yy').format(dateRange.start)}-${DateFormat('dd/MM/yy').format(dateRange.end)}',
-                          style: const TextStyle(fontSize: 11),
+                        label: Flexible(
+                          child: Text(
+                            dateRange == null
+                                ? 'Date'
+                                : '${DateFormat('dd/MM/yy').format(dateRange.start)}-${DateFormat('dd/MM/yy').format(dateRange.end)}',
+                            style: const TextStyle(fontSize: 11),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(
@@ -331,6 +355,8 @@ class _IssueCard extends ConsumerWidget {
                         color: theme.colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w500,
                       ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
                     ),
                   ],
                 ),

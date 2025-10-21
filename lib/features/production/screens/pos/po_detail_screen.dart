@@ -82,19 +82,25 @@ class PoDetailScreen extends ConsumerWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                po.poNumber,
-                                style: theme.textTheme.headlineMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: theme.colorScheme.primary,
+                              Expanded(
+                                child: Text(
+                                  po.poNumber,
+                                  style: theme.textTheme.headlineMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: theme.colorScheme.primary,
+                                      ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                              if (isCompleted)
+                              if (isCompleted) ...[
+                                const SizedBox(width: 8),
                                 Chip(
                                   label: const Text('Completed'),
                                   backgroundColor:
                                       theme.colorScheme.tertiaryContainer,
                                 ),
+                              ],
                             ],
                           ),
                           const Divider(height: 24),
@@ -233,18 +239,26 @@ class PoDetailScreen extends ConsumerWidget {
                           const Divider(height: 24),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              Text(
-                                'Total Amount',
-                                style: theme.textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
+                              Expanded(
+                                child: Text(
+                                  'Total Amount',
+                                  style: theme.textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
-                              Text(
-                                '₹${po.totalAmount.toStringAsFixed(2)}',
-                                style: theme.textTheme.headlineMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: theme.colorScheme.primary,
+                              const SizedBox(width: 8),
+                              Flexible(
+                                child: Text(
+                                  '₹${po.totalAmount.toStringAsFixed(2)}',
+                                  style: theme.textTheme.headlineMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: theme.colorScheme.primary,
+                                      ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ],
@@ -275,6 +289,7 @@ class PoDetailScreen extends ConsumerWidget {
                             Text(
                               po.instructions!,
                               style: theme.textTheme.bodyLarge,
+                              softWrap: true,
                             ),
                           ],
                         ),
@@ -401,9 +416,16 @@ class _InfoRow extends StatelessWidget {
                               color: theme.colorScheme.primary,
                               decoration: TextDecoration.underline,
                             ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 2,
                           ),
                         )
-                      : Text(value, style: theme.textTheme.bodyLarge)),
+                      : Text(
+                          value,
+                          style: theme.textTheme.bodyLarge,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
+                        )),
             ],
           ),
         ),
@@ -529,9 +551,13 @@ class _IssuesSection extends ConsumerWidget {
                                             ?.copyWith(
                                               fontWeight: FontWeight.w600,
                                             ),
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 2,
                                       ),
                                     ),
+                                    const SizedBox(width: 8),
                                     Row(
+                                      mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Text(
                                           DateFormat(
@@ -544,7 +570,7 @@ class _IssuesSection extends ConsumerWidget {
                                                     .onSurfaceVariant,
                                               ),
                                         ),
-                                        const SizedBox(width: 8),
+                                        const SizedBox(width: 4),
                                         Icon(
                                           Icons.chevron_right,
                                           size: 20,
@@ -558,11 +584,16 @@ class _IssuesSection extends ConsumerWidget {
                                 Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
-                                    Text(
-                                      'Qty: ${issue.quantity} × ₹${issue.rate.toStringAsFixed(2)}',
-                                      style: theme.textTheme.bodyMedium,
+                                    Expanded(
+                                      child: Text(
+                                        'Qty: ${issue.quantity} × ₹${issue.rate.toStringAsFixed(2)}',
+                                        style: theme.textTheme.bodyMedium,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
                                     ),
+                                    const SizedBox(width: 8),
                                     Text(
                                       '₹${issue.totalAmount.toStringAsFixed(2)}',
                                       style: theme.textTheme.titleMedium
@@ -583,18 +614,25 @@ class _IssuesSection extends ConsumerWidget {
                     // Grand total
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text(
-                          'Total Issues Amount',
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
+                        Expanded(
+                          child: Text(
+                            'Total Issues Amount',
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                        Text(
-                          '₹${grandTotal.toStringAsFixed(2)}',
-                          style: theme.textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: theme.colorScheme.primary,
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            '₹${grandTotal.toStringAsFixed(2)}',
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.primary,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
@@ -760,9 +798,13 @@ class _BillsSection extends ConsumerWidget {
                                             ?.copyWith(
                                               fontWeight: FontWeight.w600,
                                             ),
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 2,
                                       ),
                                     ),
+                                    const SizedBox(width: 8),
                                     Row(
+                                      mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Text(
                                           DateFormat(
@@ -775,7 +817,7 @@ class _BillsSection extends ConsumerWidget {
                                                     .onSurfaceVariant,
                                               ),
                                         ),
-                                        const SizedBox(width: 8),
+                                        const SizedBox(width: 4),
                                         Icon(
                                           Icons.chevron_right,
                                           size: 20,
@@ -789,11 +831,16 @@ class _BillsSection extends ConsumerWidget {
                                 Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
-                                    Text(
-                                      'Qty: ${bill.quantity} × ₹${bill.rate.toStringAsFixed(2)}',
-                                      style: theme.textTheme.bodyMedium,
+                                    Expanded(
+                                      child: Text(
+                                        'Qty: ${bill.quantity} × ₹${bill.rate.toStringAsFixed(2)}',
+                                        style: theme.textTheme.bodyMedium,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
                                     ),
+                                    const SizedBox(width: 8),
                                     Text(
                                       '₹${bill.totalAmount.toStringAsFixed(2)}',
                                       style: theme.textTheme.titleMedium
@@ -814,18 +861,25 @@ class _BillsSection extends ConsumerWidget {
                     // Grand total
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text(
-                          'Total Bills Amount',
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
+                        Expanded(
+                          child: Text(
+                            'Total Bills Amount',
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                        Text(
-                          '₹${grandTotal.toStringAsFixed(2)}',
-                          style: theme.textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: theme.colorScheme.primary,
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            '₹${grandTotal.toStringAsFixed(2)}',
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.primary,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
