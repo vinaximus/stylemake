@@ -1,5 +1,5 @@
 import 'package:go_router/go_router.dart';
-import 'package:stylemake/core/widgets/app_shell.dart';
+import 'package:stylemake/core/widgets/adaptive_app_shell.dart';
 import 'package:stylemake/features/masters/screens/masters_home_screen.dart';
 import 'package:stylemake/features/masters/screens/styles/style_form_screen.dart';
 import 'package:stylemake/features/masters/screens/styles/styles_list_screen.dart';
@@ -76,7 +76,7 @@ class AppRouter {
     routes: [
       ShellRoute(
         builder: (context, state, child) {
-          return AppShell(child: child);
+          return AdaptiveAppShell(child: child);
         },
         routes: [
           GoRoute(

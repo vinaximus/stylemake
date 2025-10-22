@@ -3,7 +3,9 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:stylemake/core/router/app_router.dart';
 import 'package:stylemake/core/services/supabase_service.dart';
+import 'package:stylemake/core/services/platform_service.dart';
 import 'package:stylemake/core/theme/app_theme.dart';
+import 'package:stylemake/core/theme/fluent_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,10 +34,16 @@ class StylemakeApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Use Fluent Design for desktop, Material 3 for mobile/web
+    final theme = PlatformService.shouldUseFluent
+        ? FluentTheme.lightTheme
+        : AppTheme.lightTheme;
+
     return MaterialApp.router(
       title: 'Stylemake v0.5',
-      theme: AppTheme.lightTheme,
+      theme: theme,
       routerConfig: AppRouter.router,
+      debugShowCheckedModeBanner: false,
     );
   }
 }
