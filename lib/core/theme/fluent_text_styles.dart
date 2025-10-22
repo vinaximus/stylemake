@@ -110,10 +110,14 @@ class FluentTextStyles {
   );
 
   // Helper methods for creating themed text styles
-  static TextStyle displayWithColor(Color color) => display.copyWith(color: color);
-  static TextStyle largeTitleWithColor(Color color) => largeTitle.copyWith(color: color);
+  static TextStyle displayWithColor(Color color) =>
+      display.copyWith(color: color);
+  static TextStyle largeTitleWithColor(Color color) =>
+      largeTitle.copyWith(color: color);
   static TextStyle titleWithColor(Color color) => title.copyWith(color: color);
-  static TextStyle subtitleWithColor(Color color) => subtitle.copyWith(color: color);
+  static TextStyle subtitleWithColor(Color color) =>
+      subtitle.copyWith(color: color);
   static TextStyle bodyWithColor(Color color) => body.copyWith(color: color);
-  static TextStyle captionWithColor(Color color) => caption.copyWith(color: color);
+  static TextStyle captionWithColor(Color color) =>
+      caption.copyWith(color: color);
 }

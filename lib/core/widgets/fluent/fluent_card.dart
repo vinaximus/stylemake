@@ -28,10 +28,7 @@ class FluentCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: FluentColors.surface,
         borderRadius: borderRadius ?? BorderRadius.circular(4),
-        border: Border.all(
-          color: FluentColors.border,
-          width: 1,
-        ),
+        border: Border.all(color: FluentColors.border, width: 1),
         boxShadow: _getShadow(),
       ),
       child: Material(
@@ -40,10 +37,7 @@ class FluentCard extends StatelessWidget {
           onTap: onTap,
           borderRadius: borderRadius ?? BorderRadius.circular(4),
           child: padding != null
-              ? Padding(
-                  padding: padding!,
-                  child: child,
-                )
+              ? Padding(padding: padding!, child: child)
               : child,
         ),
       ),
@@ -91,10 +85,7 @@ class FluentListCard extends StatelessWidget {
       padding: padding ?? const EdgeInsets.all(16),
       child: Row(
         children: [
-          if (leading != null) ...[
-            leading!,
-            const SizedBox(width: 12),
-          ],
+          if (leading != null) ...[leading!, const SizedBox(width: 12)],
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

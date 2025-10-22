@@ -59,10 +59,7 @@ class FluentTheme {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(4),
-        side: const BorderSide(
-          color: FluentColors.border,
-          width: 1,
-        ),
+        side: const BorderSide(color: FluentColors.border, width: 1),
       ),
       shadowColor: FluentColors.shadow,
     ),
@@ -84,38 +81,23 @@ class FluentTheme {
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(2),
-        borderSide: const BorderSide(
-          color: FluentColors.border,
-          width: 1,
-        ),
+        borderSide: const BorderSide(color: FluentColors.border, width: 1),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(2),
-        borderSide: const BorderSide(
-          color: FluentColors.border,
-          width: 1,
-        ),
+        borderSide: const BorderSide(color: FluentColors.border, width: 1),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(2),
-        borderSide: const BorderSide(
-          color: FluentColors.focus,
-          width: 2,
-        ),
+        borderSide: const BorderSide(color: FluentColors.focus, width: 2),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(2),
-        borderSide: const BorderSide(
-          color: FluentColors.error,
-          width: 1,
-        ),
+        borderSide: const BorderSide(color: FluentColors.error, width: 1),
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(2),
-        borderSide: const BorderSide(
-          color: FluentColors.error,
-          width: 2,
-        ),
+        borderSide: const BorderSide(color: FluentColors.error, width: 2),
       ),
       labelStyle: FluentTextStyles.caption.copyWith(
         color: FluentColors.textSecondary,
@@ -132,9 +114,7 @@ class FluentTheme {
         foregroundColor: FluentColors.neutralWhite,
         elevation: 0,
         shadowColor: Colors.transparent,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(2),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         textStyle: FluentTextStyles.button,
       ),
@@ -144,9 +124,7 @@ class FluentTheme {
       style: FilledButton.styleFrom(
         backgroundColor: FluentColors.accent,
         foregroundColor: FluentColors.neutralWhite,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(2),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         textStyle: FluentTextStyles.button,
       ),
@@ -155,13 +133,8 @@ class FluentTheme {
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         foregroundColor: FluentColors.accent,
-        side: const BorderSide(
-          color: FluentColors.border,
-          width: 1,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(2),
-        ),
+        side: const BorderSide(color: FluentColors.border, width: 1),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         textStyle: FluentTextStyles.button,
       ),
@@ -170,9 +143,7 @@ class FluentTheme {
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
         foregroundColor: FluentColors.accent,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(2),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         textStyle: FluentTextStyles.button,
       ),
@@ -184,10 +155,7 @@ class FluentTheme {
       surfaceTintColor: Colors.transparent,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(4),
-        side: const BorderSide(
-          color: FluentColors.border,
-          width: 1,
-        ),
+        side: const BorderSide(color: FluentColors.border, width: 1),
       ),
       titleTextStyle: FluentTextStyles.title,
       contentTextStyle: FluentTextStyles.body,
@@ -205,15 +173,9 @@ class FluentTheme {
       }),
       iconTheme: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
-          return const IconThemeData(
-            color: FluentColors.accent,
-            size: 24,
-          );
+          return const IconThemeData(color: FluentColors.accent, size: 24);
         }
-        return const IconThemeData(
-          color: FluentColors.textSecondary,
-          size: 24,
-        );
+        return const IconThemeData(color: FluentColors.textSecondary, size: 24);
       }),
     ),
 
