@@ -186,6 +186,9 @@ Below is a phased, minimal-step TODO list for **v0.5 (Production Module)**. Task
     - Report combines Cuttings, POs, Issues, Bills, Receipts for a date range and style.
     - Report can be exported as CSV.
     - Summary shows totals: qty cut, qty issued to vendors, qty received, total cost from bills.
+  [ ] **Receipts per Cutting**
+  - Acceptance criteria:
+    - Cutting detail page shows receipts related to that cutting. ✅
 
 ---
 

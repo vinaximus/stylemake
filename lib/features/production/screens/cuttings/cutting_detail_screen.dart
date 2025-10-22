@@ -9,6 +9,7 @@ import 'package:stylemake/features/production/providers/bill_providers.dart';
 import 'package:stylemake/features/production/providers/cutting_providers.dart';
 import 'package:stylemake/features/production/providers/issue_providers.dart';
 import 'package:stylemake/features/production/providers/po_providers.dart';
+import 'package:stylemake/core/providers/receipt_providers.dart';
 
 /// Cutting detail screen showing cutting information and linked POs
 class CuttingDetailScreen extends ConsumerWidget {
@@ -321,6 +322,11 @@ class CuttingDetailScreen extends ConsumerWidget {
 
                   // Bills Section (Phase 7)
                   _BillsSection(cuttingId: cuttingId),
+
+          const SizedBox(height: LayoutConstants.spaceLarge),
+
+          // Receipts Section (Phase 8)
+          _ReceiptsSection(cuttingId: cuttingId),
                 ],
               ),
             ),
@@ -816,6 +822,183 @@ class _BillsSection extends ConsumerWidget {
                         'Error loading bills',
                         style: theme.textTheme.titleMedium,
                       ),
+                      const SizedBox(height: LayoutConstants.spaceSmall),
+                      Text(
+                        error.toString(),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ReceiptsSection extends ConsumerWidget {
+  const _ReceiptsSection({required this.cuttingId});
+
+  final String cuttingId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final receiptsAsync = ref.watch(receiptsByCuttingProvider(cuttingId));
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(LayoutConstants.paddingLarge),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Receipts',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                FilledButton.icon(
+                  onPressed: () {
+                    context.push('${AppRouter.receiptsAdd}?cuttingId=$cuttingId');
+                  },
+                  icon: const Icon(Icons.add, size: 18),
+                  label: const Text('Add'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  ),
+                ),
+              ],
+            ),
+            const Divider(height: 24),
+            receiptsAsync.when(
+              data: (receipts) {
+                if (receipts.isEmpty) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(LayoutConstants.paddingLarge),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.inventory_outlined,
+                            size: 64,
+                            color: theme.colorScheme.outline,
+                          ),
+                          const SizedBox(height: LayoutConstants.spaceMedium),
+                          Text('No receipts recorded yet', style: theme.textTheme.titleMedium),
+                          const SizedBox(height: LayoutConstants.spaceSmall),
+                          Text(
+                            'Receipts will appear here when finished goods are recorded for this cutting',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
+                final totalReceived = receipts.fold<int>(0, (sum, r) => sum + r.quantityReceived);
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${receipts.length} ${receipts.length == 1 ? 'Receipt' : 'Receipts'} recorded',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: LayoutConstants.spaceSmall),
+                    ...receipts.map(
+                      (r) => Padding(
+                        padding: const EdgeInsets.only(bottom: LayoutConstants.spaceSmall),
+                        child: InkWell(
+                          onTap: () {
+                            context.push(AppRouter.receiptsEdit(r.id));
+                          },
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: theme.colorScheme.outline.withOpacity(0.5)),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Icons.inventory_2, size: 20, color: theme.colorScheme.primary),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        r.receiptId,
+                                        style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'Qty: ${r.quantityReceived}',
+                                        style: theme.textTheme.bodySmall,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Icon(Icons.chevron_right, color: theme.colorScheme.outline),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const Divider(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Total Quantity Received',
+                          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          '$totalReceived',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+              },
+              loading: () => const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(LayoutConstants.paddingLarge),
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+              error: (error, stack) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(LayoutConstants.paddingLarge),
+                  child: Column(
+                    children: [
+                      Icon(Icons.error_outline, size: 48, color: theme.colorScheme.error),
+                      const SizedBox(height: LayoutConstants.spaceMedium),
+                      Text('Error loading receipts', style: theme.textTheme.titleMedium),
                       const SizedBox(height: LayoutConstants.spaceSmall),
                       Text(
                         error.toString(),

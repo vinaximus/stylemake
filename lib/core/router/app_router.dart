@@ -16,7 +16,10 @@ import 'package:stylemake/features/production/screens/pos/po_detail_screen.dart'
 import 'package:stylemake/features/production/screens/pos/po_form_screen.dart';
 import 'package:stylemake/features/production/screens/pos/pos_list_screen.dart';
 import 'package:stylemake/features/production/screens/production_home_screen.dart';
+import 'package:stylemake/features/production/screens/receipts/receipt_form_screen.dart';
+import 'package:stylemake/features/production/screens/receipts/receipts_list_screen.dart';
 import 'package:stylemake/features/reports/screens/reports_home_screen.dart';
+import 'package:stylemake/features/reports/screens/production_summary_screen.dart';
 
 /// Application router configuration using go_router
 class AppRouter {
@@ -59,6 +62,14 @@ class AppRouter {
   static const String billsAdd = '/production/bills/add';
   static String billsEdit(String id) => '/production/bills/$id/edit';
 
+  // Receipt routes
+  static const String receiptsList = '/production/receipts';
+  static const String receiptsAdd = '/production/receipts/add';
+  static String receiptsEdit(String id) => '/production/receipts/$id/edit';
+
+  // Reports
+  static const String productionSummary = '/reports/production-summary';
+
   /// Router configuration with ShellRoute for AppShell
   static final GoRouter router = GoRouter(
     initialLocation: production,
@@ -85,6 +96,12 @@ class AppRouter {
             name: 'reports',
             pageBuilder: (context, state) =>
                 const NoTransitionPage(child: ReportsHomeScreen()),
+          ),
+          GoRoute(
+            path: productionSummary,
+            name: 'productionSummary',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: ProductionSummaryScreen()),
           ),
           // Style routes
           GoRoute(
@@ -236,6 +253,32 @@ class AppRouter {
             pageBuilder: (context, state) {
               final id = state.pathParameters['id']!;
               return NoTransitionPage(child: BillFormScreen(billId: id));
+            },
+          ),
+
+          // Receipt routes
+          GoRoute(
+            path: receiptsList,
+            name: 'receiptsList',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: ReceiptsListScreen()),
+          ),
+          GoRoute(
+            path: receiptsAdd,
+            name: 'receiptsAdd',
+            pageBuilder: (context, state) {
+              final cuttingId = state.uri.queryParameters['cuttingId'];
+              return NoTransitionPage(
+                child: ReceiptFormScreen(prefillCuttingId: cuttingId),
+              );
+            },
+          ),
+          GoRoute(
+            path: '/production/receipts/:id/edit',
+            name: 'receiptsEdit',
+            pageBuilder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return NoTransitionPage(child: ReceiptFormScreen(receiptId: id));
             },
           ),
         ],
