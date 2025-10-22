@@ -210,7 +210,14 @@ class _PoFormScreenState extends ConsumerState<PoFormScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEditMode ? 'Edit Purchase Order' : 'Add Purchase Order'),
+        title: Text(_isEditMode ? 'Edit Purchase Order' : 'Create Purchase Order'),
+        actions: [
+          IconButton(
+            tooltip: 'Save purchase order',
+            onPressed: _isSaving ? null : _savePo,
+            icon: const Icon(Icons.check),
+          ),
+        ],
       ),
       body: ResponsiveCenter(
         maxWidth: LayoutConstants.maxFormWidth,

@@ -1,4 +1,7 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:stylemake/features/production/screens/cuttings/cutting_form_screen.dart';
 import 'package:stylemake/core/utils/validators.dart';
 
 void main() {
@@ -55,6 +58,13 @@ void main() {
       expect(validator(''), null);
       expect(validator(null), null);
     });
+  });
+
+  testWidgets('Cutting form shows validation on empty submit', (tester) async {
+    await tester.pumpWidget(const ProviderScope(child: MaterialApp(home: CuttingFormScreen())));
+    await tester.tap(find.byIcon(Icons.check));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('required'), findsWidgets);
   });
 }
 

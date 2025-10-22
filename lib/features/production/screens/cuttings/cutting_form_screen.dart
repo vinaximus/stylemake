@@ -152,7 +152,16 @@ class _CuttingFormScreenState extends ConsumerState<CuttingFormScreen> {
     final stylesDropdown = ref.watch(stylesDropdownProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(_isEditMode ? 'Edit Cutting' : 'Add Cutting')),
+      appBar: AppBar(
+        title: Text(_isEditMode ? 'Edit Cutting' : 'Add Cutting'),
+        actions: [
+          IconButton(
+            tooltip: 'Save cutting',
+            onPressed: _isSaving ? null : _saveForm,
+            icon: const Icon(Icons.check),
+          ),
+        ],
+      ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(

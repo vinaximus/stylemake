@@ -80,34 +80,37 @@ class ProductionSummaryScreen extends ConsumerWidget {
                         const SizedBox(height: LayoutConstants.spaceLarge),
                         Align(
                           alignment: Alignment.centerRight,
-                          child: FilledButton.icon(
-                            onPressed: () {
-                              final rows = [
-                                {
-                                  'Qty Cut': t.qtyCut,
-                                  'Qty Issued': t.qtyIssued,
-                                  'Qty Received': t.qtyReceived,
-                                  'Total Bill Cost': t.totalBillCost.toStringAsFixed(2),
-                                }
-                              ];
-                              final csv = CsvExporter.listOfMapsToCsv(rows);
-                              // For now, just show a dialog with CSV; integration with sharing/downloading can be added
-                              showDialog(
-                                context: context,
-                                builder: (_) => AlertDialog(
-                                  title: const Text('CSV Export'),
-                                  content: SingleChildScrollView(child: Text(csv)),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.of(context).pop(),
-                                      child: const Text('Close'),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                            icon: const Icon(Icons.download),
-                            label: const Text('Export CSV'),
+                          child: Tooltip(
+                            message: 'Export CSV',
+                            child: FilledButton.icon(
+                              onPressed: () {
+                                final rows = [
+                                  {
+                                    'Qty Cut': t.qtyCut,
+                                    'Qty Issued': t.qtyIssued,
+                                    'Qty Received': t.qtyReceived,
+                                    'Total Bill Cost': t.totalBillCost.toStringAsFixed(2),
+                                  }
+                                ];
+                                final csv = CsvExporter.listOfMapsToCsv(rows);
+                                // For now, just show a dialog with CSV; integration with sharing/downloading can be added
+                                showDialog(
+                                  context: context,
+                                  builder: (_) => AlertDialog(
+                                    title: const Text('CSV Export'),
+                                    content: SingleChildScrollView(child: Text(csv)),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.of(context).pop(),
+                                        child: const Text('Close'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                              icon: const Icon(Icons.download),
+                              label: const Text('Export CSV'),
+                            ),
                           ),
                         ),
                       ],

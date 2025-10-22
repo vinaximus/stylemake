@@ -3,6 +3,53 @@ import 'package:stylemake/core/utils/validators.dart';
 
 void main() {
   group('Validators', () {
+    group('email', () {
+      test('accepts valid email', () {
+        final validator = Validators.email();
+        expect(validator('user@example.com'), isNull);
+      });
+      test('rejects invalid email', () {
+        final validator = Validators.email();
+        expect(validator('user@@example'), isNotNull);
+      });
+    });
+
+    group('phoneNumber', () {
+      test('accepts 10-digit number', () {
+        final validator = Validators.phoneNumber();
+        expect(validator('9876543210'), isNull);
+      });
+      test('rejects short number', () {
+        final validator = Validators.phoneNumber();
+        expect(validator('12345'), isNotNull);
+      });
+    });
+
+    group('positiveDecimal', () {
+      test('rejects zero', () {
+        final validator = Validators.positiveDecimal();
+        expect(validator('0'), isNotNull);
+      });
+      test('rejects >2 decimal places', () {
+        final validator = Validators.positiveDecimal();
+        expect(validator('1.234'), isNotNull);
+      });
+      test('accepts 2 decimal places', () {
+        final validator = Validators.positiveDecimal();
+        expect(validator('10.25'), isNull);
+      });
+    });
+
+    group('maxLength', () {
+      test('rejects too long string', () {
+        final validator = Validators.maxLength(3);
+        expect(validator('abcd'), isNotNull);
+      });
+      test('accepts within limit', () {
+        final validator = Validators.maxLength(3);
+        expect(validator('abc'), isNull);
+      });
+    });
     group('required', () {
       test('returns error for null', () {
         final validator = Validators.required();

@@ -166,7 +166,13 @@ class _ReceiptFormScreenState extends ConsumerState<ReceiptFormScreen> {
     );
 
     return Scaffold(
-      appBar: AppBar(title: Text(_isEditMode ? 'Edit Receipt' : 'Add Receipt')),
+      appBar: AppBar(title: Text(_isEditMode ? 'Edit Receipt' : 'Add Receipt'), actions: [
+        IconButton(
+          tooltip: 'Save receipt',
+          onPressed: _isSaving ? null : _save,
+          icon: const Icon(Icons.check),
+        ),
+      ]),
       body: ResponsiveCenter(
         maxWidth: LayoutConstants.maxFormWidth,
         padding: const EdgeInsets.all(LayoutConstants.paddingLarge),
@@ -246,7 +252,7 @@ class _ReceiptFormScreenState extends ConsumerState<ReceiptFormScreen> {
                                 width: 20,
                                 child: CircularProgressIndicator(strokeWidth: 2),
                               )
-                            : Text(_isEditMode ? 'Update Receipt' : 'Create Receipt'),
+                            : const Tooltip(message: 'Save receipt', child: Text('Create Receipt')),
                       ),
                     ),
                   ],

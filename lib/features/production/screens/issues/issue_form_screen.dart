@@ -193,6 +193,13 @@ class _IssueFormScreenState extends ConsumerState<IssueFormScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_isEditMode ? 'Edit Item Issue' : 'Add Item Issue'),
+        actions: [
+          IconButton(
+            tooltip: 'Save issue',
+            onPressed: _isSaving ? null : _saveIssue,
+            icon: const Icon(Icons.check),
+          ),
+        ],
       ),
       body: ResponsiveCenter(
         maxWidth: LayoutConstants.maxFormWidth,
@@ -349,9 +356,7 @@ class _IssueFormScreenState extends ConsumerState<IssueFormScreen> {
                                   strokeWidth: 2,
                                 ),
                               )
-                            : Text(
-                                _isEditMode ? 'Update Issue' : 'Create Issue',
-                              ),
+                            : const Tooltip(message: 'Save issue', child: Text('Create Issue')),
                       ),
                     ),
                   ],

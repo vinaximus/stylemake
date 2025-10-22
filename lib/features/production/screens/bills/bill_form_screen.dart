@@ -191,7 +191,16 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
     );
 
     return Scaffold(
-      appBar: AppBar(title: Text(_isEditMode ? 'Edit Bill' : 'Add Bill')),
+      appBar: AppBar(
+        title: Text(_isEditMode ? 'Edit Bill' : 'Add Bill'),
+        actions: [
+          IconButton(
+            tooltip: 'Save bill',
+            onPressed: _isSaving ? null : _saveBill,
+            icon: const Icon(Icons.check),
+          ),
+        ],
+      ),
       body: ResponsiveCenter(
         maxWidth: LayoutConstants.maxFormWidth,
         padding: const EdgeInsets.all(LayoutConstants.paddingLarge),
@@ -339,7 +348,7 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
                                   strokeWidth: 2,
                                 ),
                               )
-                            : Text(_isEditMode ? 'Update Bill' : 'Create Bill'),
+                            : const Tooltip(message: 'Save bill', child: Text('Create Bill')),
                       ),
                     ),
                   ],
