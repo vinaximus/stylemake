@@ -101,7 +101,9 @@ class FluentListCard extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: FluentTextStyles.bodyStrong,
+                  style: FluentTextStyles.bodyStrong.copyWith(
+                    color: FluentColors.textPrimary,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -155,7 +157,9 @@ class FluentDataCard extends StatelessWidget {
           if (title != null) ...[
             Text(
               title!,
-              style: FluentTextStyles.title,
+              style: FluentTextStyles.title.copyWith(
+                color: FluentColors.textPrimary,
+              ),
             ),
             const SizedBox(height: 12),
           ],
@@ -178,7 +182,9 @@ class FluentDataCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       entry.value,
-                      style: FluentTextStyles.body,
+                      style: FluentTextStyles.body.copyWith(
+                        color: FluentColors.textPrimary,
+                      ),
                     ),
                   ),
                 ],

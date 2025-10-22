@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stylemake/core/theme/fluent_colors.dart';
 
 /// Fluent Design System typography scale
 class FluentTextStyles {
@@ -10,6 +11,7 @@ class FluentTextStyles {
     fontWeight: FontWeight.w400,
     letterSpacing: -0.5,
     height: 1.2,
+    color: FluentColors.textPrimary,
   );
 
   // Large title
@@ -18,6 +20,7 @@ class FluentTextStyles {
     fontWeight: FontWeight.w400,
     letterSpacing: 0,
     height: 1.3,
+    color: FluentColors.textPrimary,
   );
 
   // Title styles
@@ -26,6 +29,7 @@ class FluentTextStyles {
     fontWeight: FontWeight.w600,
     letterSpacing: 0,
     height: 1.3,
+    color: FluentColors.textPrimary,
   );
 
   static const TextStyle titleSecondary = TextStyle(
@@ -33,6 +37,7 @@ class FluentTextStyles {
     fontWeight: FontWeight.w600,
     letterSpacing: 0,
     height: 1.3,
+    color: FluentColors.textPrimary,
   );
 
   // Subtitle
@@ -41,6 +46,7 @@ class FluentTextStyles {
     fontWeight: FontWeight.w400,
     letterSpacing: 0,
     height: 1.4,
+    color: FluentColors.textPrimary,
   );
 
   // Body styles
@@ -49,6 +55,7 @@ class FluentTextStyles {
     fontWeight: FontWeight.w400,
     letterSpacing: 0,
     height: 1.4,
+    color: FluentColors.textPrimary,
   );
 
   static const TextStyle bodyStrong = TextStyle(
@@ -56,6 +63,7 @@ class FluentTextStyles {
     fontWeight: FontWeight.w600,
     letterSpacing: 0,
     height: 1.4,
+    color: FluentColors.textPrimary,
   );
 
   // Caption
@@ -64,6 +72,7 @@ class FluentTextStyles {
     fontWeight: FontWeight.w400,
     letterSpacing: 0,
     height: 1.3,
+    color: FluentColors.textSecondary,
   );
 
   static const TextStyle captionStrong = TextStyle(
@@ -71,6 +80,7 @@ class FluentTextStyles {
     fontWeight: FontWeight.w600,
     letterSpacing: 0,
     height: 1.3,
+    color: FluentColors.textSecondary,
   );
 
   // Button text
@@ -79,6 +89,7 @@ class FluentTextStyles {
     fontWeight: FontWeight.w600,
     letterSpacing: 0,
     height: 1.2,
+    color: FluentColors.neutralWhite,
   );
 
   // Navigation
@@ -87,6 +98,7 @@ class FluentTextStyles {
     fontWeight: FontWeight.w400,
     letterSpacing: 0,
     height: 1.3,
+    color: FluentColors.textPrimary,
   );
 
   static const TextStyle navigationSelected = TextStyle(
@@ -94,6 +106,7 @@ class FluentTextStyles {
     fontWeight: FontWeight.w600,
     letterSpacing: 0,
     height: 1.3,
+    color: FluentColors.accent,
   );
 
   // Helper methods for creating themed text styles
