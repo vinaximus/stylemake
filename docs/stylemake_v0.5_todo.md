@@ -208,19 +208,19 @@ Below is a phased, minimal-step TODO list for **v0.5 (Production Module)**. Task
 
 ---
 
-## Phase 10 — UI/UX polish, accessibility, testing
+## Phase 10 — UI/UX polish, accessibility, testing ✅ COMPLETED
 
-- [ ] **Material 3 styling & theme**
+- [X] **Material 3 styling & theme**
   - Acceptance criteria:
     - Theme uses primary Indigo/Deep Blue and specified typography.
     - Components follow Material 3 guidelines (cards, FABs).
-- [ ] **Mobile-first responsive fixes**
+- [X] **Mobile-first responsive fixes**
   - Acceptance criteria:
     - Views render correctly on narrow (mobile) and wide (desktop) screens.
-- [ ] **Accessibility basics**
+- [X] **Accessibility basics**
   - Acceptance criteria:
     - Buttons have semantic labels; forms have `aria`-equivalents where applicable.
-- [ ] **Unit & integration tests**
+- [X] **Unit & integration tests**
   - Acceptance criteria:
     - Add tests for at least: Creating a Style, Creating a Cutting, Creating a PO, and exporting PDF.
     - CI runs tests on `develop` branch; failing tests block merge.
