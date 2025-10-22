@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:stylemake/core/constants/layout_constants.dart';
+import 'package:stylemake/core/router/app_router.dart';
 import 'package:stylemake/core/widgets/responsive_center.dart';
 
 /// Reports module home screen (placeholder for Phase 8+)
@@ -42,37 +44,12 @@ class ReportsHomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: LayoutConstants.spaceXLarge),
               Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(LayoutConstants.paddingLarge),
-                  child: Column(
-                    children: [
-                      const Icon(Icons.timeline, size: 48),
-                      const SizedBox(height: LayoutConstants.spaceMedium),
-                      Text(
-                        'Coming in Phase 8',
-                        style: theme.textTheme.titleLarge,
-                      ),
-                      const SizedBox(height: LayoutConstants.spaceSmall),
-                      const Text(
-                        'Production Summary Report',
-                        textAlign: TextAlign.center,
-                      ),
-                      const Divider(height: 24),
-                      const Text(
-                        'Features:',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        '• Cutting vs Receipt analysis\n'
-                        '• Vendor bill summaries\n'
-                        '• Style-wise production tracking\n'
-                        '• Date range filtering\n'
-                        '• CSV export capability',
-                        textAlign: TextAlign.left,
-                      ),
-                    ],
-                  ),
+                child: ListTile(
+                  leading: const Icon(Icons.timeline),
+                  title: const Text('Production Summary'),
+                  subtitle: const Text('KPIs and CSV export'),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  onTap: () => context.push(AppRouter.productionSummary),
                 ),
               ),
             ],

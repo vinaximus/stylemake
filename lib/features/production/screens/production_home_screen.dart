@@ -85,10 +85,9 @@ class ProductionHomeScreen extends StatelessWidget {
                 child: ListTile(
                   leading: const Icon(Icons.check_circle),
                   title: const Text('Receipts'),
-                  subtitle: const Text('Coming in Phase 8'),
+                  subtitle: const Text('Record finished goods receipts'),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: null,
-                  enabled: false,
+                  onTap: () => context.push(AppRouter.receiptsList),
                 ),
               ),
             ],

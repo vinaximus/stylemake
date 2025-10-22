@@ -172,21 +172,21 @@ Below is a phased, minimal-step TODO list for **v0.5 (Production Module)**. Task
 
 ---
 
-## Phase 8 — Receipts of Finished Goods + Production Summary
+## Phase 8 — Receipts of Finished Goods + Production Summary ✅ COMPLETED
 
-- [ ] **Receipt — Create & link to Cutting**
+- [X] **Receipt — Create & link to Cutting**
   - Acceptance criteria:
     - Receipt form: Receipt ID auto, Cutting Ref, Style ID, Qty Received, Date, Notes.
     - On save, updates `receipts` table and marks quantities against cutting.
-- [ ] **Receipt — Edit/Delete & list**
+- [X] **Receipt — Edit/Delete & list**
   - Acceptance criteria:
     - Receipt CRUD works; list filterable by date/style.
-- [ ] **Production Summary Report**
+- [X] **Production Summary Report**
   - Acceptance criteria:
     - Report combines Cuttings, POs, Issues, Bills, Receipts for a date range and style.
     - Report can be exported as CSV.
     - Summary shows totals: qty cut, qty issued to vendors, qty received, total cost from bills.
-  [ ] **Receipts per Cutting**
+  [X] **Receipts per Cutting**
   - Acceptance criteria:
     - Cutting detail page shows receipts related to that cutting. ✅
 
