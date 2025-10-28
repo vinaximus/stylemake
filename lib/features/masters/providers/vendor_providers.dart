@@ -7,10 +7,10 @@ final vendorRepositoryProvider = Provider<VendorRepository>((ref) {
   return VendorRepository();
 });
 
-/// Provider for vendors list
-final vendorsListProvider = FutureProvider<List<Vendor>>((ref) async {
-  final repository = ref.watch(vendorRepositoryProvider);
-  return repository.getAllVendors();
+/// Provider for vendors list with real-time updates
+final vendorsListProvider = StreamProvider<List<Vendor>>((ref) {
+  final repository = ref.read(vendorRepositoryProvider);
+  return repository.watchAllVendors();
 });
 
 /// Provider for search query

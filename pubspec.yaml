@@ -56,6 +56,14 @@ dependencies:
   
   # Fluent Design System support
   fluent_ui: ^4.0.0
+  
+  # Firebase for error logging and monitoring
+  firebase_core: ^3.8.1
+  firebase_crashlytics: ^4.2.0
+  
+  # File download/share
+  path_provider: ^2.1.5
+  share_plus: ^10.1.2
 
 dev_dependencies:
   flutter_test:

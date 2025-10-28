@@ -1,5 +1,7 @@
 import 'package:stylemake/core/models/item_issue.dart';
 import 'package:stylemake/core/services/supabase_service.dart';
+import 'package:stylemake/core/services/realtime_service.dart';
+import 'package:stylemake/core/utils/error_handler.dart';
 
 /// Repository for Item Issues
 class ItemIssueRepository {
@@ -10,6 +12,38 @@ class ItemIssueRepository {
 
   final _companyId = defaultCompanyId;
   final _userId = defaultCompanyId;
+
+  /// Stream of issues with real-time updates
+  Stream<List<ItemIssueWithDetails>> watchAllIssues() async* {
+    // First, yield the initial data
+    try {
+      final initialData = await getAllIssues();
+      yield initialData;
+    } catch (e, stackTrace) {
+      ErrorHandler.logError('watchAllIssues - initial load', e, stackTrace);
+      yield [];
+    }
+
+    // Then, listen for realtime updates and refresh data
+    final realtimeStream = RealtimeService.instance.subscribeToCompanyTable(
+      table: 'item_issues',
+    );
+
+    await for (final _ in realtimeStream) {
+      try {
+        // Fetch fresh data whenever there's an update
+        final freshData = await getAllIssues();
+        yield freshData;
+      } catch (e, stackTrace) {
+        ErrorHandler.logError(
+          'watchAllIssues - realtime update',
+          e,
+          stackTrace,
+        );
+        // Don't yield on error, keep the previous state
+      }
+    }
+  }
 
   /// Get all issues with details (JOIN with PO, vendor, cutting)
   Future<List<ItemIssueWithDetails>> getAllIssues() async {

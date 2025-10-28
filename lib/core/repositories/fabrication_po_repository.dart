@@ -1,5 +1,8 @@
 import 'package:stylemake/core/models/fabrication_po.dart';
 import 'package:stylemake/core/services/supabase_service.dart';
+import 'package:stylemake/core/services/realtime_service.dart';
+import 'package:stylemake/core/utils/error_handler.dart';
+import 'package:stylemake/core/utils/performance_monitor.dart';
 
 /// Repository for Fabrication Purchase Orders
 class FabricationPoRepository {
@@ -11,25 +14,55 @@ class FabricationPoRepository {
   final _companyId = defaultCompanyId;
   final _userId = defaultCompanyId;
 
+  /// Stream of POs with real-time updates
+  Stream<List<FabricationPoWithDetails>> watchAllPos() async* {
+    // First, yield the initial data
+    try {
+      final initialData = await getAllPos();
+      yield initialData;
+    } catch (e, stackTrace) {
+      ErrorHandler.logError('watchAllPos - initial load', e, stackTrace);
+      yield [];
+    }
+
+    // Then, listen for realtime updates and refresh data
+    final realtimeStream = RealtimeService.instance.subscribeToCompanyTable(
+      table: 'fabrication_pos',
+    );
+
+    await for (final _ in realtimeStream) {
+      try {
+        // Fetch fresh data whenever there's an update
+        final freshData = await getAllPos();
+        yield freshData;
+      } catch (e, stackTrace) {
+        ErrorHandler.logError('watchAllPos - realtime update', e, stackTrace);
+        // Don't yield on error, keep the previous state
+      }
+    }
+  }
+
   /// Get all POs with details (JOIN with cuttings, vendors, styles)
   Future<List<FabricationPoWithDetails>> getAllPos() async {
-    try {
-      final response = await _supabase
-          .from('fabrication_pos')
-          .select('''
+    return PerformanceMonitor.instance.measure('getAllPos', () async {
+      try {
+        final response = await _supabase
+            .from('fabrication_pos')
+            .select('''
             *,
             cuttings!inner(cutting_ref, style_id, styles!inner(name)),
             vendors!inner(name, gst, city)
           ''')
-          .eq('company_id', _companyId)
-          .order('created_at', ascending: false);
+            .eq('company_id', _companyId)
+            .order('created_at', ascending: false);
 
-      return (response as List)
-          .map((json) => FabricationPoWithDetails.fromJson(json))
-          .toList();
-    } catch (e) {
-      throw Exception('Failed to fetch POs: $e');
-    }
+        return (response as List)
+            .map((json) => FabricationPoWithDetails.fromJson(json))
+            .toList();
+      } catch (e) {
+        throw Exception('Failed to fetch POs: $e');
+      }
+    });
   }
 
   /// Get single PO with details

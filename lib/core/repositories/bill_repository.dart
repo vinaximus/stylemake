@@ -1,5 +1,7 @@
 import 'package:stylemake/core/models/bill.dart';
 import 'package:stylemake/core/services/supabase_service.dart';
+import 'package:stylemake/core/services/realtime_service.dart';
+import 'package:stylemake/core/utils/error_handler.dart';
 
 /// Repository for Bills (Supplier Invoices)
 class BillRepository {
@@ -10,6 +12,34 @@ class BillRepository {
 
   final _companyId = defaultCompanyId;
   final _userId = defaultCompanyId;
+
+  /// Stream of bills with real-time updates
+  Stream<List<BillWithDetails>> watchAllBills() async* {
+    // First, yield the initial data
+    try {
+      final initialData = await getAllBills();
+      yield initialData;
+    } catch (e, stackTrace) {
+      ErrorHandler.logError('watchAllBills - initial load', e, stackTrace);
+      yield [];
+    }
+
+    // Then, listen for realtime updates and refresh data
+    final realtimeStream = RealtimeService.instance.subscribeToCompanyTable(
+      table: 'bills',
+    );
+
+    await for (final _ in realtimeStream) {
+      try {
+        // Fetch fresh data whenever there's an update
+        final freshData = await getAllBills();
+        yield freshData;
+      } catch (e, stackTrace) {
+        ErrorHandler.logError('watchAllBills - realtime update', e, stackTrace);
+        // Don't yield on error, keep the previous state
+      }
+    }
+  }
 
   /// Get all bills with details (JOIN with PO, vendor, cutting)
   Future<List<BillWithDetails>> getAllBills() async {

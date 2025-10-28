@@ -1,5 +1,8 @@
 import 'package:stylemake/core/models/vendor.dart';
 import 'package:stylemake/core/services/supabase_service.dart';
+import 'package:stylemake/core/services/realtime_service.dart';
+import 'package:stylemake/core/utils/error_handler.dart';
+import 'package:stylemake/core/utils/performance_monitor.dart';
 
 /// Repository for Vendor-related database operations
 class VendorRepository {
@@ -11,22 +14,56 @@ class VendorRepository {
   /// Default company ID for v0.5 single-company mode
   static const String defaultCompanyId = '00000000-0000-0000-0000-000000000000';
 
+  /// Stream of vendors with real-time updates
+  Stream<List<Vendor>> watchAllVendors() async* {
+    // First, yield the initial data
+    try {
+      final initialData = await getAllVendors();
+      yield initialData;
+    } catch (e, stackTrace) {
+      ErrorHandler.logError('watchAllVendors - initial load', e, stackTrace);
+      yield [];
+    }
+
+    // Then, listen for realtime updates and refresh data
+    final realtimeStream = RealtimeService.instance.subscribeToCompanyTable(
+      table: 'vendors',
+    );
+
+    await for (final _ in realtimeStream) {
+      try {
+        // Fetch fresh data whenever there's an update
+        final freshData = await getAllVendors();
+        yield freshData;
+      } catch (e, stackTrace) {
+        ErrorHandler.logError(
+          'watchAllVendors - realtime update',
+          e,
+          stackTrace,
+        );
+        // Don't yield on error, keep the previous state
+      }
+    }
+  }
+
   /// Fetch all vendors for the current company
   Future<List<Vendor>> getAllVendors() async {
-    try {
-      final response = await _supabaseService.client
-          .from('vendors')
-          .select()
-          .eq('company_id', defaultCompanyId)
-          .order('name');
+    return PerformanceMonitor.instance.measure('getAllVendors', () async {
+      try {
+        final response = await _supabaseService.client
+            .from('vendors')
+            .select()
+            .eq('company_id', defaultCompanyId)
+            .order('name');
 
-      final data = response as List<dynamic>;
-      return data
-          .map((json) => Vendor.fromJson(json as Map<String, dynamic>))
-          .toList();
-    } catch (e) {
-      throw Exception('Failed to fetch vendors: $e');
-    }
+        final data = response as List<dynamic>;
+        return data
+            .map((json) => Vendor.fromJson(json as Map<String, dynamic>))
+            .toList();
+      } catch (e) {
+        throw Exception('Failed to fetch vendors: $e');
+      }
+    });
   }
 
   /// Get a single vendor by ID

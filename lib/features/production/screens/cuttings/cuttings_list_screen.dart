@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:stylemake/core/constants/layout_constants.dart';
+import 'package:stylemake/core/models/cutting.dart';
 import 'package:stylemake/core/providers/dropdown_providers.dart';
 import 'package:stylemake/core/router/app_router.dart';
+import 'package:stylemake/core/utils/csv_exporter.dart';
 import 'package:stylemake/core/utils/snackbar_utils.dart';
 import 'package:stylemake/core/widgets/app_fab.dart';
 import 'package:stylemake/core/widgets/dialogs/confirm_dialog.dart';
@@ -30,6 +32,13 @@ class CuttingsListScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Cutting Records'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.file_download),
+            tooltip: 'Export to CSV',
+            onPressed: () => _exportCuttingsToCsv(context, filteredCuttings),
+          ),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(110),
           child: Column(
@@ -367,6 +376,38 @@ class CuttingsListScreen extends ConsumerWidget {
           'Failed to delete cutting: ${e.toString()}',
         );
       }
+    }
+  }
+}
+
+/// Export cuttings to CSV
+void _exportCuttingsToCsv(
+  BuildContext context,
+  List<CuttingWithStyle> filteredCuttings,
+) async {
+  try {
+    if (filteredCuttings.isEmpty) {
+      SnackbarUtils.showInfo(context, 'No cuttings to export');
+      return;
+    }
+
+    final csvContent = CsvExporter.cuttingsToCsv(filteredCuttings);
+    final filename = CsvExporter.generateFilename('cuttings');
+
+    await CsvExporter.downloadOrShareCsv(
+      csvContent: csvContent,
+      filename: filename,
+    );
+
+    if (context.mounted) {
+      SnackbarUtils.showSuccess(
+        context,
+        'Exported ${filteredCuttings.length} cuttings',
+      );
+    }
+  } catch (e) {
+    if (context.mounted) {
+      SnackbarUtils.showError(context, 'Failed to export CSV: ${e.toString()}');
     }
   }
 }

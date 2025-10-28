@@ -8,12 +8,10 @@ final poRepositoryProvider = Provider<FabricationPoRepository>((ref) {
   return FabricationPoRepository();
 });
 
-/// Provider for all POs list
-final posListProvider = FutureProvider<List<FabricationPoWithDetails>>((
-  ref,
-) async {
+/// Provider for all POs list with real-time updates
+final posListProvider = StreamProvider<List<FabricationPoWithDetails>>((ref) {
   final repository = ref.read(poRepositoryProvider);
-  return repository.getAllPos();
+  return repository.watchAllPos();
 });
 
 /// Provider for PO search query

@@ -1,5 +1,7 @@
 import 'package:stylemake/core/models/style.dart';
 import 'package:stylemake/core/services/supabase_service.dart';
+import 'package:stylemake/core/services/realtime_service.dart';
+import 'package:stylemake/core/utils/error_handler.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Repository for Style-related database operations
@@ -11,6 +13,38 @@ class StyleRepository {
 
   /// Default company ID for v0.5 single-company mode
   static const String defaultCompanyId = '00000000-0000-0000-0000-000000000000';
+
+  /// Stream of styles with real-time updates
+  Stream<List<Style>> watchAllStyles() async* {
+    // First, yield the initial data
+    try {
+      final initialData = await getAllStyles();
+      yield initialData;
+    } catch (e, stackTrace) {
+      ErrorHandler.logError('watchAllStyles - initial load', e, stackTrace);
+      yield [];
+    }
+
+    // Then, listen for realtime updates and refresh data
+    final realtimeStream = RealtimeService.instance.subscribeToCompanyTable(
+      table: 'styles',
+    );
+
+    await for (final _ in realtimeStream) {
+      try {
+        // Fetch fresh data whenever there's an update
+        final freshData = await getAllStyles();
+        yield freshData;
+      } catch (e, stackTrace) {
+        ErrorHandler.logError(
+          'watchAllStyles - realtime update',
+          e,
+          stackTrace,
+        );
+        // Don't yield on error, keep the previous state
+      }
+    }
+  }
 
   /// Fetch all styles for the current company
   Future<List<Style>> getAllStyles() async {

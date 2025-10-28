@@ -7,10 +7,10 @@ final styleRepositoryProvider = Provider<StyleRepository>((ref) {
   return StyleRepository();
 });
 
-/// Provider for styles list
-final stylesListProvider = FutureProvider<List<Style>>((ref) async {
-  final repository = ref.watch(styleRepositoryProvider);
-  return repository.getAllStyles();
+/// Provider for styles list with real-time updates
+final stylesListProvider = StreamProvider<List<Style>>((ref) {
+  final repository = ref.read(styleRepositoryProvider);
+  return repository.watchAllStyles();
 });
 
 /// Provider for search query

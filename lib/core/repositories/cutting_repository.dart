@@ -1,5 +1,8 @@
 import 'package:stylemake/core/models/cutting.dart';
 import 'package:stylemake/core/services/supabase_service.dart';
+import 'package:stylemake/core/services/realtime_service.dart';
+import 'package:stylemake/core/utils/error_handler.dart';
+import 'package:stylemake/core/utils/performance_monitor.dart';
 
 /// Repository for Cutting-related database operations
 class CuttingRepository {
@@ -11,26 +14,60 @@ class CuttingRepository {
   /// Default company ID for v0.5 single-company mode
   static const String defaultCompanyId = '00000000-0000-0000-0000-000000000000';
 
+  /// Stream of cuttings with real-time updates
+  Stream<List<CuttingWithStyle>> watchAllCuttings() async* {
+    // First, yield the initial data
+    try {
+      final initialData = await getAllCuttings();
+      yield initialData;
+    } catch (e, stackTrace) {
+      ErrorHandler.logError('watchAllCuttings - initial load', e, stackTrace);
+      yield [];
+    }
+
+    // Then, listen for realtime updates and refresh data
+    final realtimeStream = RealtimeService.instance.subscribeToCompanyTable(
+      table: 'cuttings',
+    );
+
+    await for (final _ in realtimeStream) {
+      try {
+        // Fetch fresh data whenever there's an update
+        final freshData = await getAllCuttings();
+        yield freshData;
+      } catch (e, stackTrace) {
+        ErrorHandler.logError(
+          'watchAllCuttings - realtime update',
+          e,
+          stackTrace,
+        );
+        // Don't yield on error, keep the previous state
+      }
+    }
+  }
+
   /// Fetch all cuttings for the current company, ordered by date descending
   Future<List<CuttingWithStyle>> getAllCuttings() async {
-    try {
-      final response = await _supabaseService.client
-          .from('cuttings')
-          .select('*, styles!inner(name)')
-          .eq('company_id', defaultCompanyId)
-          .order('cutting_date', ascending: false);
+    return PerformanceMonitor.instance.measure('getAllCuttings', () async {
+      try {
+        final response = await _supabaseService.client
+            .from('cuttings')
+            .select('*, styles!inner(name)')
+            .eq('company_id', defaultCompanyId)
+            .order('cutting_date', ascending: false);
 
-      final data = response as List<dynamic>;
-      return data.map((json) {
-        final map = json as Map<String, dynamic>;
-        // Extract style name from nested object
-        final styleName =
-            (map['styles'] as Map<String, dynamic>)['name'] as String;
-        return CuttingWithStyle.fromJson({...map, 'style_name': styleName});
-      }).toList();
-    } catch (e) {
-      throw Exception('Failed to fetch cuttings: $e');
-    }
+        final data = response as List<dynamic>;
+        return data.map((json) {
+          final map = json as Map<String, dynamic>;
+          // Extract style name from nested object
+          final styleName =
+              (map['styles'] as Map<String, dynamic>)['name'] as String;
+          return CuttingWithStyle.fromJson({...map, 'style_name': styleName});
+        }).toList();
+      } catch (e) {
+        throw Exception('Failed to fetch cuttings: $e');
+      }
+    });
   }
 
   /// Get a single cutting by ID

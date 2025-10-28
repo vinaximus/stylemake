@@ -6,6 +6,7 @@ import 'package:stylemake/core/constants/layout_constants.dart';
 import 'package:stylemake/core/models/fabrication_po.dart';
 import 'package:stylemake/core/providers/dropdown_providers.dart';
 import 'package:stylemake/core/router/app_router.dart';
+import 'package:stylemake/core/utils/csv_exporter.dart';
 import 'package:stylemake/core/utils/snackbar_utils.dart';
 import 'package:stylemake/core/widgets/app_fab.dart';
 import 'package:stylemake/core/widgets/dialogs/confirm_dialog.dart';
@@ -39,6 +40,13 @@ class PosListScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Purchase Orders'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.file_download),
+            tooltip: 'Export to CSV',
+            onPressed: () => _exportToCsv(context, filteredPos),
+          ),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(170),
           child: Column(
@@ -437,5 +445,34 @@ class _PoCard extends ConsumerWidget {
         ),
       ),
     );
+  }
+}
+
+/// Export POs to CSV
+void _exportToCsv(
+  BuildContext context,
+  List<FabricationPoWithDetails> filteredPos,
+) async {
+  try {
+    if (filteredPos.isEmpty) {
+      SnackbarUtils.showInfo(context, 'No POs to export');
+      return;
+    }
+
+    final csvContent = CsvExporter.posToCsv(filteredPos);
+    final filename = CsvExporter.generateFilename('purchase_orders');
+
+    await CsvExporter.downloadOrShareCsv(
+      csvContent: csvContent,
+      filename: filename,
+    );
+
+    if (context.mounted) {
+      SnackbarUtils.showSuccess(context, 'Exported ${filteredPos.length} POs');
+    }
+  } catch (e) {
+    if (context.mounted) {
+      SnackbarUtils.showError(context, 'Failed to export CSV: ${e.toString()}');
+    }
   }
 }

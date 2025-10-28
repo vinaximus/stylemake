@@ -1,5 +1,7 @@
 import 'package:stylemake/core/models/receipt.dart';
 import 'package:stylemake/core/services/supabase_service.dart';
+import 'package:stylemake/core/services/realtime_service.dart';
+import 'package:stylemake/core/utils/error_handler.dart';
 
 /// Repository for Receipts (Finished Goods)
 class ReceiptRepository {
@@ -10,6 +12,50 @@ class ReceiptRepository {
 
   final _companyId = defaultCompanyId;
   final _userId = defaultCompanyId;
+
+  /// Stream of receipts with real-time updates
+  Stream<List<ReceiptWithDetails>> watchAllReceipts({
+    DateTime? from,
+    DateTime? to,
+    String? styleId,
+  }) async* {
+    // First, yield the initial data
+    try {
+      final initialData = await getAllReceipts(
+        from: from,
+        to: to,
+        styleId: styleId,
+      );
+      yield initialData;
+    } catch (e, stackTrace) {
+      ErrorHandler.logError('watchAllReceipts - initial load', e, stackTrace);
+      yield [];
+    }
+
+    // Then, listen for realtime updates and refresh data
+    final realtimeStream = RealtimeService.instance.subscribeToCompanyTable(
+      table: 'receipts',
+    );
+
+    await for (final _ in realtimeStream) {
+      try {
+        // Fetch fresh data whenever there's an update
+        final freshData = await getAllReceipts(
+          from: from,
+          to: to,
+          styleId: styleId,
+        );
+        yield freshData;
+      } catch (e, stackTrace) {
+        ErrorHandler.logError(
+          'watchAllReceipts - realtime update',
+          e,
+          stackTrace,
+        );
+        // Don't yield on error, keep the previous state
+      }
+    }
+  }
 
   Future<List<ReceiptWithDetails>> getAllReceipts({
     DateTime? from,
@@ -27,10 +73,16 @@ class ReceiptRepository {
           .eq('company_id', _companyId);
 
       if (from != null) {
-        query = query.gte('date_of_receipt', from.toIso8601String().split('T')[0]);
+        query = query.gte(
+          'date_of_receipt',
+          from.toIso8601String().split('T')[0],
+        );
       }
       if (to != null) {
-        query = query.lte('date_of_receipt', to.toIso8601String().split('T')[0]);
+        query = query.lte(
+          'date_of_receipt',
+          to.toIso8601String().split('T')[0],
+        );
       }
       if (styleId != null) {
         query = query.eq('style_id', styleId);
@@ -45,7 +97,9 @@ class ReceiptRepository {
     }
   }
 
-  Future<List<ReceiptWithDetails>> getReceiptsByCutting(String cuttingId) async {
+  Future<List<ReceiptWithDetails>> getReceiptsByCutting(
+    String cuttingId,
+  ) async {
     try {
       final response = await _supabase
           .from('receipts')
@@ -130,7 +184,11 @@ class ReceiptRepository {
         'user_id': _userId,
       };
 
-      final response = await _supabase.from('receipts').insert(data).select().single();
+      final response = await _supabase
+          .from('receipts')
+          .insert(data)
+          .select()
+          .single();
       return Receipt.fromJson(response);
     } catch (e) {
       throw Exception('Failed to create receipt: $e');
@@ -180,5 +238,3 @@ class ReceiptRepository {
     }
   }
 }
-
-

@@ -8,12 +8,10 @@ final cuttingRepositoryProvider = Provider<CuttingRepository>((ref) {
   return CuttingRepository();
 });
 
-/// Provider for all cuttings list
-final cuttingsListProvider = FutureProvider<List<CuttingWithStyle>>((
-  ref,
-) async {
+/// Provider for all cuttings list with real-time updates
+final cuttingsListProvider = StreamProvider<List<CuttingWithStyle>>((ref) {
   final repository = ref.read(cuttingRepositoryProvider);
-  return repository.getAllCuttings();
+  return repository.watchAllCuttings();
 });
 
 /// Provider for cutting search query
@@ -80,4 +78,3 @@ final cuttingByIdProvider = FutureProvider.family<CuttingWithStyle?, String>((
   final repository = ref.read(cuttingRepositoryProvider);
   return repository.getCuttingWithStyle(id);
 });
-

@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:stylemake/core/constants/layout_constants.dart';
+import 'package:stylemake/core/models/receipt.dart';
 import 'package:stylemake/core/providers/receipt_providers.dart';
+import 'package:stylemake/core/utils/csv_exporter.dart';
+import 'package:stylemake/core/utils/snackbar_utils.dart';
 import 'package:stylemake/core/widgets/responsive_center.dart';
 import 'package:stylemake/core/router/app_router.dart';
 
@@ -14,12 +17,19 @@ class ReceiptsListScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final receipts = ref.watch(filteredReceiptsProvider);
-    final searchController = TextEditingController(text: ref.watch(receiptSearchQueryProvider));
+    final searchController = TextEditingController(
+      text: ref.watch(receiptSearchQueryProvider),
+    );
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Receipts'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.file_download),
+            tooltip: 'Export to CSV',
+            onPressed: () => _exportReceiptsToCsv(context, receipts),
+          ),
           IconButton(
             tooltip: 'Add',
             onPressed: () => context.push(AppRouter.receiptsAdd),
@@ -40,7 +50,8 @@ class ReceiptsListScreen extends ConsumerWidget {
                 prefixIcon: Icon(Icons.search),
                 hintText: 'Search by Receipt ID, Cutting Ref, Style',
               ),
-              onChanged: (v) => ref.read(receiptSearchQueryProvider.notifier).state = v,
+              onChanged: (v) =>
+                  ref.read(receiptSearchQueryProvider.notifier).state = v,
             ),
             const SizedBox(height: LayoutConstants.spaceMedium),
 
@@ -50,9 +61,16 @@ class ReceiptsListScreen extends ConsumerWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.inventory_outlined, size: 64, color: theme.colorScheme.outline),
+                          Icon(
+                            Icons.inventory_outlined,
+                            size: 64,
+                            color: theme.colorScheme.outline,
+                          ),
                           const SizedBox(height: LayoutConstants.spaceMedium),
-                          Text('No receipts found', style: theme.textTheme.titleMedium),
+                          Text(
+                            'No receipts found',
+                            style: theme.textTheme.titleMedium,
+                          ),
                         ],
                       ),
                     )
@@ -60,24 +78,37 @@ class ReceiptsListScreen extends ConsumerWidget {
                       itemBuilder: (context, index) {
                         final r = receipts[index];
                         return InkWell(
-                          onTap: () => context.push(AppRouter.receiptsEdit(r.id)),
+                          onTap: () =>
+                              context.push(AppRouter.receiptsEdit(r.id)),
                           child: Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              border: Border.all(color: theme.colorScheme.outline.withOpacity(0.5)),
+                              border: Border.all(
+                                color: theme.colorScheme.outline.withOpacity(
+                                  0.5,
+                                ),
+                              ),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Row(
                               children: [
-                                Icon(Icons.inventory_2, size: 20, color: theme.colorScheme.primary),
+                                Icon(
+                                  Icons.inventory_2,
+                                  size: 20,
+                                  color: theme.colorScheme.primary,
+                                ),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         r.receiptId,
-                                        style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                                        style: theme.textTheme.titleSmall
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                       const SizedBox(height: 4),
@@ -88,21 +119,28 @@ class ReceiptsListScreen extends ConsumerWidget {
                                       ),
                                       Text(
                                         'Qty: ${r.quantityReceived} • ${DateFormat('dd MMM yyyy').format(r.dateOfReceipt)}',
-                                        style: theme.textTheme.bodySmall?.copyWith(
-                                          color: theme.colorScheme.onSurfaceVariant,
-                                        ),
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(
+                                              color: theme
+                                                  .colorScheme
+                                                  .onSurfaceVariant,
+                                            ),
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ],
                                   ),
                                 ),
-                                Icon(Icons.chevron_right, color: theme.colorScheme.outline),
+                                Icon(
+                                  Icons.chevron_right,
+                                  color: theme.colorScheme.outline,
+                                ),
                               ],
                             ),
                           ),
                         );
                       },
-                      separatorBuilder: (_, __) => const SizedBox(height: LayoutConstants.spaceSmall),
+                      separatorBuilder: (_, __) =>
+                          const SizedBox(height: LayoutConstants.spaceSmall),
                       itemCount: receipts.length,
                     ),
             ),
@@ -117,4 +155,34 @@ class ReceiptsListScreen extends ConsumerWidget {
   }
 }
 
+/// Export receipts to CSV
+void _exportReceiptsToCsv(
+  BuildContext context,
+  List<ReceiptWithDetails> receipts,
+) async {
+  try {
+    if (receipts.isEmpty) {
+      SnackbarUtils.showInfo(context, 'No receipts to export');
+      return;
+    }
 
+    final csvContent = CsvExporter.receiptsToCsv(receipts);
+    final filename = CsvExporter.generateFilename('receipts');
+
+    await CsvExporter.downloadOrShareCsv(
+      csvContent: csvContent,
+      filename: filename,
+    );
+
+    if (context.mounted) {
+      SnackbarUtils.showSuccess(
+        context,
+        'Exported ${receipts.length} receipts',
+      );
+    }
+  } catch (e) {
+    if (context.mounted) {
+      SnackbarUtils.showError(context, 'Failed to export CSV: ${e.toString()}');
+    }
+  }
+}
