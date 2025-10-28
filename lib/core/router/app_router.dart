@@ -1,5 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:stylemake/core/widgets/adaptive_app_shell.dart';
+import 'package:stylemake/features/dispatch/screens/dispatch_home_screen.dart';
+import 'package:stylemake/features/fabric/screens/fabric_home_screen.dart';
 import 'package:stylemake/features/masters/screens/masters_home_screen.dart';
 import 'package:stylemake/features/masters/screens/styles/style_form_screen.dart';
 import 'package:stylemake/features/masters/screens/styles/styles_list_screen.dart';
@@ -20,6 +22,8 @@ import 'package:stylemake/features/production/screens/receipts/receipt_form_scre
 import 'package:stylemake/features/production/screens/receipts/receipts_list_screen.dart';
 import 'package:stylemake/features/reports/screens/reports_home_screen.dart';
 import 'package:stylemake/features/reports/screens/production_summary_screen.dart';
+import 'package:stylemake/core/screens/settings_screen.dart';
+import 'package:stylemake/core/screens/help_screen.dart';
 
 /// Application router configuration using go_router
 class AppRouter {
@@ -27,8 +31,12 @@ class AppRouter {
 
   /// Route paths
   static const String production = '/';
+  static const String fabric = '/fabric';
+  static const String dispatch = '/dispatch';
   static const String masters = '/masters';
   static const String reports = '/reports';
+  static const String settings = '/settings';
+  static const String help = '/help';
 
   // Style routes
   static const String stylesList = '/masters/styles';
@@ -86,6 +94,18 @@ class AppRouter {
                 const NoTransitionPage(child: ProductionHomeScreen()),
           ),
           GoRoute(
+            path: fabric,
+            name: 'fabric',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: FabricHomeScreen()),
+          ),
+          GoRoute(
+            path: dispatch,
+            name: 'dispatch',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: DispatchHomeScreen()),
+          ),
+          GoRoute(
             path: masters,
             name: 'masters',
             pageBuilder: (context, state) =>
@@ -96,6 +116,18 @@ class AppRouter {
             name: 'reports',
             pageBuilder: (context, state) =>
                 const NoTransitionPage(child: ReportsHomeScreen()),
+          ),
+          GoRoute(
+            path: settings,
+            name: 'settings',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: SettingsScreen()),
+          ),
+          GoRoute(
+            path: help,
+            name: 'help',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: HelpScreen()),
           ),
           GoRoute(
             path: productionSummary,

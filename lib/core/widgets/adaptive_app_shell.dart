@@ -6,8 +6,7 @@ import 'package:stylemake/core/router/app_router.dart';
 import 'package:stylemake/core/widgets/app_shell.dart';
 import 'package:stylemake/core/widgets/fluent/fluent_navigation_pane.dart';
 
-/// Provider for bottom navigation index (shared between mobile and desktop)
-final bottomNavIndexProvider = StateProvider<int>((ref) => 0);
+// Uses bottomNavIndexProvider from app_shell.dart
 
 /// Adaptive app shell that uses Fluent Design on desktop and Material 3 on mobile
 class AdaptiveAppShell extends ConsumerWidget {
@@ -17,11 +16,14 @@ class AdaptiveAppShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (PlatformService.shouldUseFluent) {
+    final width = MediaQuery.of(context).size.width;
+    final isWide = width >= 840;
+
+    if (isWide && PlatformService.shouldUseFluent) {
       return FluentAppShell(child: child);
-    } else {
-      return AppShell(child: child);
     }
+
+    return AppShell(child: child);
   }
 }
 
@@ -46,13 +48,14 @@ class FluentAppShell extends ConsumerWidget {
               ref.read(bottomNavIndexProvider.notifier).state = index;
               _handleNavigation(context, index);
             },
+            onChildNavigation: (path) {
+              context.go(path);
+            },
             onSettingsTap: () {
-              // TODO: Implement settings navigation
-              debugPrint('Settings tapped');
+              context.go(AppRouter.settings);
             },
             onHelpTap: () {
-              // TODO: Implement help navigation
-              debugPrint('Help tapped');
+              context.go(AppRouter.help);
             },
           ),
           // Main content area
@@ -75,9 +78,15 @@ class FluentAppShell extends ConsumerWidget {
         context.go(AppRouter.production);
         break;
       case 1:
-        context.go(AppRouter.masters);
+        context.go(AppRouter.fabric);
         break;
       case 2:
+        context.go(AppRouter.dispatch);
+        break;
+      case 3:
+        context.go(AppRouter.masters);
+        break;
+      case 4:
         context.go(AppRouter.reports);
         break;
     }
@@ -109,6 +118,9 @@ class FluentAppShellWithCommandBar extends ConsumerWidget {
             onSelectionChanged: (index) {
               ref.read(bottomNavIndexProvider.notifier).state = index;
               _handleNavigation(context, index);
+            },
+            onChildNavigation: (path) {
+              context.go(path);
             },
             onSettingsTap: () {
               // TODO: Implement settings navigation
