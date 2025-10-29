@@ -7,6 +7,8 @@ import 'package:stylemake/features/masters/screens/styles/style_form_screen.dart
 import 'package:stylemake/features/masters/screens/styles/styles_list_screen.dart';
 import 'package:stylemake/features/masters/screens/vendors/vendor_form_screen.dart';
 import 'package:stylemake/features/masters/screens/vendors/vendors_list_screen.dart';
+import 'package:stylemake/features/masters/screens/customers/customer_form_screen.dart';
+import 'package:stylemake/features/masters/screens/customers/customers_list_screen.dart';
 import 'package:stylemake/features/production/screens/bills/bill_form_screen.dart';
 import 'package:stylemake/features/production/screens/bills/bills_list_screen.dart';
 import 'package:stylemake/features/production/screens/cuttings/cutting_detail_screen.dart';
@@ -47,6 +49,11 @@ class AppRouter {
   static const String vendorsList = '/masters/vendors';
   static const String vendorsAdd = '/masters/vendors/add';
   static String vendorsEdit(String id) => '/masters/vendors/$id/edit';
+
+  // Customer routes
+  static const String customersList = '/masters/customers';
+  static const String customersAdd = '/masters/customers/add';
+  static String customersEdit(String id) => '/masters/customers/$id/edit';
 
   // Cutting routes
   static const String cuttingsList = '/production/cuttings';
@@ -175,6 +182,27 @@ class AppRouter {
             pageBuilder: (context, state) {
               final id = state.pathParameters['id']!;
               return NoTransitionPage(child: VendorFormScreen(vendorId: id));
+            },
+          ),
+          // Customer routes
+          GoRoute(
+            path: customersList,
+            name: 'customersList',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: CustomersListScreen()),
+          ),
+          GoRoute(
+            path: customersAdd,
+            name: 'customersAdd',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: CustomerFormScreen()),
+          ),
+          GoRoute(
+            path: '/masters/customers/:id/edit',
+            name: 'customersEdit',
+            pageBuilder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return NoTransitionPage(child: CustomerFormScreen(customerId: id));
             },
           ),
           // Cutting routes

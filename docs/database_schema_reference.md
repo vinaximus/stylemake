@@ -1,8 +1,8 @@
 # Database Schema Reference
 ## Stylemake v0.5 - Production Module
 
-**Schema Version:** v0.5.0  
-**Last Updated:** October 18, 2025  
+**Schema Version:** v0.7.0  
+**Last Updated:** January 2025  
 **Database:** PostgreSQL (via Supabase)
 
 ---
@@ -23,15 +23,18 @@
 
 ## Overview
 
-The Stylemake Production Module uses 7 core tables to manage the garment manufacturing workflow:
+The Stylemake Production Module uses 10 core tables to manage the garment manufacturing workflow:
 
 1. **styles** - Master data for garment styles
 2. **vendors** - Master data for fabrication vendors
-3. **cuttings** - Production cutting records
-4. **fabrication_pos** - Purchase orders to vendors
-5. **item_issues** - Items issued under purchase orders
-6. **bills** - Supplier invoices against POs
-7. **receipts** - Finished goods received
+3. **customers** - Master data for customers (v0.7)
+4. **cuttings** - Production cutting records
+5. **fabrication_pos** - Purchase orders to vendors
+6. **item_issues** - Items issued under purchase orders
+7. **bills** - Supplier invoices against POs
+8. **receipts** - Finished goods received
+9. **dispatch_master** - Dispatch challan records (v0.7)
+10. **dispatch_items** - Dispatch line items (v0.7)
 
 ### Data Flow
 
@@ -44,6 +47,9 @@ The Stylemake Production Module uses 7 core tables to manage the garment manufac
            │                 └──> [receipts]
            │                        ↑
            └────────────────────────┘
+           │
+           └──> [dispatch_items] ──> [dispatch_master] ──> [customers]
+
 [vendors] ────> [fabrication_pos]
 ```
 
@@ -420,6 +426,142 @@ CREATE TABLE receipts (
 
 ---
 
+### 8. customers
+
+Master table for customer information (v0.7).
+
+```sql
+CREATE TABLE customers (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    customer_name TEXT NOT NULL,
+    contact_person TEXT,
+    phone TEXT,
+    address TEXT,
+    gst_no TEXT,
+    company_id UUID DEFAULT '00000000-0000-0000-0000-000000000000' NOT NULL,
+    user_id UUID DEFAULT '00000000-0000-0000-0000-000000000000' NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
+);
+```
+
+**Columns:**
+- `id` - Unique identifier (UUID, auto-generated)
+- `customer_name` - Customer/company name (required)
+- `contact_person` - Contact person name (optional)
+- `phone` - Phone number (optional)
+- `address` - Customer address (optional)
+- `gst_no` - GST registration number (optional)
+- `company_id` - Company ownership
+- `user_id` - User who created the record
+- `created_at` - Record creation timestamp
+- `updated_at` - Last update timestamp
+
+**Relationships:**
+- Referenced by: `dispatch_master.customer_id`
+
+**Business Rules:**
+- Customer names should be unique per company (not enforced in v0.7)
+- Customers cannot be deleted if referenced by dispatches
+
+---
+
+### 9. dispatch_master
+
+Main dispatch challan records (v0.7).
+
+```sql
+CREATE TABLE dispatch_master (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    dispatch_no TEXT NOT NULL,
+    dispatch_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    customer_id UUID NOT NULL,
+    transport_name TEXT,
+    vehicle_no TEXT,
+    lr_no TEXT,
+    total_quantity NUMERIC DEFAULT 0 CHECK (total_quantity >= 0),
+    remarks TEXT,
+    company_id UUID DEFAULT '00000000-0000-0000-0000-000000000000' NOT NULL,
+    user_id UUID DEFAULT '00000000-0000-0000-0000-000000000000' NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
+);
+```
+
+**Columns:**
+- `id` - Unique identifier (UUID, auto-generated)
+- `dispatch_no` - Dispatch/challan number (e.g., "DCH-0001")
+- `dispatch_date` - Date of dispatch (defaults to current date)
+- `customer_id` - Reference to customer (FK to customers)
+- `transport_name` - Transport company name (optional)
+- `vehicle_no` - Vehicle number (optional)
+- `lr_no` - Lorry receipt number (optional)
+- `total_quantity` - Total quantity dispatched (calculated from items)
+- `remarks` - Additional notes (optional)
+- `company_id` - Company ownership
+- `user_id` - User who created the record
+- `created_at` - Record creation timestamp
+- `updated_at` - Last update timestamp
+
+**Relationships:**
+- References: `customers.id` via `customer_id`
+- Referenced by: `dispatch_items.dispatch_id`
+
+**Business Rules:**
+- Dispatch number must be unique per company
+- Customer must exist before creating dispatch
+- Total quantity must be non-negative
+- Dispatches can be deleted (CASCADE to items)
+
+**Unique Constraint:**
+- `(dispatch_no, company_id)` - Prevents duplicate dispatch numbers
+
+---
+
+### 10. dispatch_items
+
+Line items for each dispatch challan (v0.7).
+
+```sql
+CREATE TABLE dispatch_items (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    dispatch_id UUID NOT NULL,
+    style_id UUID NOT NULL,
+    color TEXT,
+    size TEXT,
+    quantity NUMERIC NOT NULL CHECK (quantity > 0),
+    rate NUMERIC CHECK (rate >= 0),
+    remarks TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
+);
+```
+
+**Columns:**
+- `id` - Unique identifier (UUID, auto-generated)
+- `dispatch_id` - Reference to dispatch record (FK to dispatch_master)
+- `style_id` - Reference to style (FK to styles)
+- `color` - Item color (optional)
+- `size` - Item size (optional)
+- `quantity` - Quantity dispatched (must be > 0)
+- `rate` - Unit rate (optional, must be >= 0)
+- `remarks` - Line item notes (optional)
+- `created_at` - Record creation timestamp
+
+**Relationships:**
+- References: `dispatch_master.id` via `dispatch_id` (CASCADE delete)
+- References: `styles.id` via `style_id`
+
+**Business Rules:**
+- Dispatch and style must exist before creating item
+- Quantity must be positive
+- Rate must be non-negative if provided
+- Items are deleted if parent dispatch is deleted (CASCADE)
+
+**Calculated Values:**
+- Line total = quantity × rate (calculated in application)
+
+---
+
 ## Relationships
 
 ### Entity Relationship Diagram (Text)
@@ -431,7 +573,9 @@ styles (1) ──────< (M) cuttings (1) ──────< (M) fabricat
    │                      │                           │
    │                      │                           └──< (M) bills
    │                      │
-   └──────────────< (M) receipts (M) >────────────────┘
+   │                      └──> [receipts]
+   │
+   └──> [dispatch_items] ──> [dispatch_master] ──> [customers]
 
 vendors (1) ──────< (M) fabrication_pos
 ```
@@ -447,10 +591,13 @@ vendors (1) ──────< (M) fabrication_pos
 | bills | po_id | fabrication_pos | id | CASCADE |
 | receipts | cutting_id | cuttings | id | RESTRICT |
 | receipts | style_id | styles | id | RESTRICT |
+| dispatch_master | customer_id | customers | id | RESTRICT |
+| dispatch_items | dispatch_id | dispatch_master | id | CASCADE |
+| dispatch_items | style_id | styles | id | RESTRICT |
 
 **On Delete Behaviors:**
-- **RESTRICT** - Prevents deletion if child records exist (styles, vendors, cuttings)
-- **CASCADE** - Deletes child records when parent is deleted (item_issues, bills)
+- **RESTRICT** - Prevents deletion if child records exist (styles, vendors, cuttings, customers)
+- **CASCADE** - Deletes child records when parent is deleted (item_issues, bills, dispatch_items)
 
 ---
 
@@ -883,18 +1030,18 @@ if (styleExists) { /* proceed */ }
 ```
 
 ### Table Count
-7 tables total
+10 tables total
 
 ### Foreign Keys
-7 foreign key relationships
+10 foreign key relationships
 
 ### Indexes
 27+ indexes for performance
 
 ### Constraints
-- 3 unique constraints (cutting_ref, po_number, receipt_id)
-- 10+ check constraints (quantities, rates, dates, enums)
-- 7 foreign key constraints
+- 4 unique constraints (cutting_ref, po_number, receipt_id, dispatch_no)
+- 12+ check constraints (quantities, rates, dates, enums)
+- 10 foreign key constraints
 
 ---
 

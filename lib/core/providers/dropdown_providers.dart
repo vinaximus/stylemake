@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:stylemake/features/masters/providers/style_providers.dart';
 import 'package:stylemake/features/masters/providers/vendor_providers.dart';
+import 'package:stylemake/features/masters/providers/customer_providers.dart';
 import 'package:stylemake/features/production/providers/cutting_providers.dart';
 
 /// Provider for styles dropdown items
@@ -34,4 +35,20 @@ final cuttingsDropdownProvider = Provider<List<DropdownMenuItem<String>>>((
       child: Text('${cutting.cuttingRef} - ${cutting.styleName}'),
     );
   }).toList();
+});
+
+/// Provider for customers dropdown items
+final customersDropdownProvider = Provider<List<DropdownMenuItem<String>>>((ref) {
+  final customersAsync = ref.watch(customersListProvider);
+  
+  return customersAsync.when(
+    data: (customers) => customers.map((customer) {
+      return DropdownMenuItem<String>(
+        value: customer.id,
+        child: Text(customer.customerName),
+      );
+    }).toList(),
+    loading: () => <DropdownMenuItem<String>>[],
+    error: (_, __) => <DropdownMenuItem<String>>[],
+  );
 });

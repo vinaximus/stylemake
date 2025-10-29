@@ -28,7 +28,7 @@ class MastersHomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: LayoutConstants.spaceSmall),
             Text(
-              'Manage styles and vendors for your production',
+              'Manage styles, vendors, and customers for your production',
               style: theme.textTheme.bodyLarge?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -54,6 +54,18 @@ class MastersHomeScreen extends StatelessWidget {
                 trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                 onTap: () {
                   context.push(AppRouter.vendorsList);
+                },
+              ),
+            ),
+            const SizedBox(height: LayoutConstants.spaceSmall),
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.people),
+                title: const Text('Customer Master'),
+                subtitle: const Text('Manage dispatch customers'),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                onTap: () {
+                  context.push(AppRouter.customersList);
                 },
               ),
             ),
