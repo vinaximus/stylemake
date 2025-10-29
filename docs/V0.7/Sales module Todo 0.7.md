@@ -258,53 +258,55 @@ CREATE TABLE customers (
 
 ---
 
-## **Phase 15: Product/Style Management UI**
+## **Phase 15: Product/Style Management UI** ✅
 
-* [ ] Create `ProductListScreen` in Flutter
-* [ ] Fetch all products from Supabase (sorted by name)
-* [ ] Add FAB to open Add Product form
-* [ ] Create `AddEditProductScreen` with name and designer fields
-* [ ] Implement real-time search by name or designer
-* [ ] Add delete functionality with reference check
+* [x] Create `ProductListScreen` in Flutter
+* [x] Fetch all products from Supabase (sorted by name)
+* [x] Add FAB to open Add Product form
+* [x] Create `AddEditProductScreen` with name and designer fields
+* [x] Implement real-time search by name or designer
+* [x] Add delete functionality with reference check
 
 **Acceptance Criteria:**
 
-* Product list displays correctly with name and designer
-* Search filters products instantly as user types
-* User can create, edit, and conditionally delete products
-* Deletion blocked with clear message if product in use
-* Real-time updates when changes occur
+* [x] Product list displays correctly with name and designer
+* [x] Search filters products instantly as user types
+* [x] User can create, edit, and conditionally delete products
+* [x] Deletion blocked with clear message if product in use
+* [x] Real-time updates when changes occur
 
 ---
 
-## **Phase 16: Dispatch List & Detail UI**
+## **Phase 16: Dispatch List & Detail UI** ✅
 
-* [ ] Create `DispatchListScreen` in Flutter
-* [ ] Fetch all dispatches from Supabase (latest first)
-* [ ] Add FAB to open Add Dispatch form
-* [ ] Create `DispatchDetailScreen` to view challan details
+* [x] Create `DispatchListScreen` in Flutter
+* [x] Fetch all dispatches from Supabase (latest first)
+* [x] Add FAB to open Add Dispatch form
+* [x] Create `DispatchDetailScreen` to view challan details
 
 **Acceptance Criteria:**
 
-* Dispatch list displays correctly
-* Tapping entry opens details
-* Adding dummy data in Supabase shows in UI
+* [x] Dispatch list displays correctly with search functionality
+* [x] Tapping entry opens details with master and items data
+* [x] Real-time updates and responsive design implemented
+* [x] Delete functionality with confirmation dialog
 
 ---
 
-## **Phase 17: Add/Edit Dispatch with Items**
+## **Phase 17: Add/Edit Dispatch with Items** ✅
 
-* [ ] Build `AddDispatchScreen` with all master fields
-* [ ] Add dynamic list for items (add/edit/delete rows)
-* [ ] Save both master and items using Supabase transaction
-* [ ] Calculate total quantity dynamically
-* [ ] Auto-generate Dispatch No (e.g., DCH-0001)
+* [x] Build `DispatchFormScreen` with all master fields
+* [x] Add dynamic list for items (add/edit/delete rows)
+* [x] Save both master and items using Supabase transaction
+* [x] Calculate total quantity dynamically
+* [x] Auto-generate Dispatch No (e.g., DCH-0001)
 
 **Acceptance Criteria:**
 
-* New dispatch can be created with one or more items
-* Data saved to Supabase and visible in list
-* Auto-numbering works correctly
+* [x] New dispatch can be created with one or more items
+* [x] Data saved to Supabase and visible in list
+* [x] Auto-numbering works correctly (DCH-XXXX format)
+* [x] Complete CRUD cycle with validation and error handling
 
 ---
 

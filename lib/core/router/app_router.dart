@@ -1,6 +1,9 @@
 import 'package:go_router/go_router.dart';
 import 'package:stylemake/core/widgets/adaptive_app_shell.dart';
 import 'package:stylemake/features/dispatch/screens/dispatch_home_screen.dart';
+import 'package:stylemake/features/dispatch/screens/dispatches_list_screen.dart';
+import 'package:stylemake/features/dispatch/screens/dispatch_form_screen.dart';
+import 'package:stylemake/features/dispatch/screens/dispatch_detail_screen.dart';
 import 'package:stylemake/features/fabric/screens/fabric_home_screen.dart';
 import 'package:stylemake/features/masters/screens/masters_home_screen.dart';
 import 'package:stylemake/features/masters/screens/styles/style_form_screen.dart';
@@ -54,6 +57,12 @@ class AppRouter {
   static const String customersList = '/masters/customers';
   static const String customersAdd = '/masters/customers/add';
   static String customersEdit(String id) => '/masters/customers/$id/edit';
+
+  // Dispatch routes
+  static const String dispatchesList = '/dispatch/list';
+  static const String dispatchesAdd = '/dispatch/add';
+  static String dispatchesEdit(String id) => '/dispatch/$id/edit';
+  static String dispatchesDetail(String id) => '/dispatch/$id/detail';
 
   // Cutting routes
   static const String cuttingsList = '/production/cuttings';
@@ -202,7 +211,42 @@ class AppRouter {
             name: 'customersEdit',
             pageBuilder: (context, state) {
               final id = state.pathParameters['id']!;
-              return NoTransitionPage(child: CustomerFormScreen(customerId: id));
+              return NoTransitionPage(
+                child: CustomerFormScreen(customerId: id),
+              );
+            },
+          ),
+          // Dispatch routes
+          GoRoute(
+            path: dispatchesList,
+            name: 'dispatchesList',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: DispatchesListScreen()),
+          ),
+          GoRoute(
+            path: dispatchesAdd,
+            name: 'dispatchesAdd',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: DispatchFormScreen()),
+          ),
+          GoRoute(
+            path: '/dispatch/:id/edit',
+            name: 'dispatchesEdit',
+            pageBuilder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return NoTransitionPage(
+                child: DispatchFormScreen(dispatchId: id),
+              );
+            },
+          ),
+          GoRoute(
+            path: '/dispatch/:id/detail',
+            name: 'dispatchesDetail',
+            pageBuilder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return NoTransitionPage(
+                child: DispatchDetailScreen(dispatchId: id),
+              );
             },
           ),
           // Cutting routes

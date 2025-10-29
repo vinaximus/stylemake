@@ -328,10 +328,11 @@ class FluentDefaultNavigationPane extends ConsumerWidget {
           icon: Icons.texture,
           label: 'Fabric',
         ),
-        const FluentNavigationItem(
+        FluentNavigationItem(
           key: 'dispatch',
           icon: Icons.local_shipping,
           label: 'Dispatch',
+          onTap: () => onChildNavigation('/dispatch/list'),
         ),
         FluentNavigationItem(
           key: 'masters',

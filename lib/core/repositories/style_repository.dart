@@ -98,12 +98,13 @@ class StyleRepository {
   }
 
   /// Create a new style
-  Future<Style> createStyle({required String name}) async {
+  Future<Style> createStyle({required String name, String? designer}) async {
     try {
       final response = await _supabaseService.client
           .from('styles')
           .insert({
             'name': name,
+            'designer': designer,
             'company_id': defaultCompanyId,
             'user_id': defaultCompanyId,
           })
@@ -117,11 +118,15 @@ class StyleRepository {
   }
 
   /// Update an existing style
-  Future<Style> updateStyle({required String id, required String name}) async {
+  Future<Style> updateStyle({
+    required String id,
+    required String name,
+    String? designer,
+  }) async {
     try {
       final response = await _supabaseService.client
           .from('styles')
-          .update({'name': name})
+          .update({'name': name, 'designer': designer})
           .eq('id', id)
           .eq('company_id', defaultCompanyId)
           .select()
@@ -143,6 +148,63 @@ class StyleRepository {
           .eq('company_id', defaultCompanyId);
     } catch (e) {
       throw Exception('Failed to delete style: $e');
+    }
+  }
+
+  /// Check if a style can be deleted (not referenced in other tables)
+  Future<bool> canDeleteStyle(String id) async {
+    try {
+      // Check cuttings table
+      final cuttingsResponse = await _supabaseService.client
+          .from('cuttings')
+          .select('id')
+          .eq('style_id', id)
+          .limit(1);
+
+      if (cuttingsResponse.isNotEmpty) return false;
+
+      // Check dispatch_items table
+      final dispatchResponse = await _supabaseService.client
+          .from('dispatch_items')
+          .select('id')
+          .eq('style_id', id)
+          .limit(1);
+
+      if (dispatchResponse.isNotEmpty) return false;
+
+      // Check receipts table
+      final receiptsResponse = await _supabaseService.client
+          .from('receipts')
+          .select('id')
+          .eq('style_id', id)
+          .limit(1);
+
+      if (receiptsResponse.isNotEmpty) return false;
+
+      return true;
+    } catch (e) {
+      throw Exception('Failed to check style references: $e');
+    }
+  }
+
+  /// Get unique designers from all styles
+  Future<List<String>> getUniqueDesigners() async {
+    try {
+      final response = await _supabaseService.client
+          .from('styles')
+          .select('designer')
+          .eq('company_id', defaultCompanyId)
+          .not('designer', 'is', null)
+          .order('designer');
+
+      final data = response as List<dynamic>;
+      return data
+          .map((json) => json['designer'] as String)
+          .where((designer) => designer.isNotEmpty)
+          .toSet()
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to fetch unique designers: $e');
     }
   }
 }

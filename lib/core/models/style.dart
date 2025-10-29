@@ -7,6 +7,7 @@ class Style {
     required this.userId,
     required this.createdAt,
     required this.updatedAt,
+    this.designer,
   });
 
   factory Style.fromJson(Map<String, dynamic> json) {
@@ -17,6 +18,7 @@ class Style {
       userId: json['user_id'] as String,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
+      designer: json['designer'] as String?,
     );
   }
 
@@ -26,6 +28,7 @@ class Style {
   final String userId;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final String? designer;
 
   Map<String, dynamic> toJson() {
     return {
@@ -35,6 +38,7 @@ class Style {
       'user_id': userId,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
+      'designer': designer,
     };
   }
 
@@ -45,6 +49,7 @@ class Style {
     String? userId,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? designer,
   }) {
     return Style(
       id: id ?? this.id,
@@ -53,21 +58,25 @@ class Style {
       userId: userId ?? this.userId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      designer: designer ?? this.designer,
     );
   }
 
   @override
   String toString() {
-    return 'Style(id: $id, name: $name)';
+    return 'Style(id: $id, name: $name, designer: $designer)';
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
 
-    return other is Style && other.id == id && other.name == name;
+    return other is Style &&
+        other.id == id &&
+        other.name == name &&
+        other.designer == designer;
   }
 
   @override
-  int get hashCode => id.hashCode ^ name.hashCode;
+  int get hashCode => id.hashCode ^ name.hashCode ^ designer.hashCode;
 }

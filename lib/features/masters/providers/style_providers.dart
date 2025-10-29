@@ -18,14 +18,38 @@ final styleSearchQueryProvider = StateProvider<String>((ref) => '');
 
 /// Provider for filtered styles based on search query
 final filteredStylesProvider = Provider<List<Style>>((ref) {
-  final styles = ref.watch(stylesListProvider).value ?? [];
+  final stylesAsync = ref.watch(stylesListProvider);
   final query = ref.watch(styleSearchQueryProvider).toLowerCase();
 
-  if (query.isEmpty) {
-    return styles;
-  }
+  return stylesAsync.when(
+    data: (styles) {
+      if (query.isEmpty) {
+        return styles;
+      }
 
-  return styles
-      .where((style) => style.name.toLowerCase().contains(query))
-      .toList();
+      return styles.where((style) {
+        final nameMatch = style.name.toLowerCase().contains(query);
+        final designerMatch =
+            style.designer?.toLowerCase().contains(query) ?? false;
+        return nameMatch || designerMatch;
+      }).toList();
+    },
+    loading: () => <Style>[],
+    error: (_, __) => <Style>[],
+  );
+});
+
+/// Provider for checking if style can be deleted
+final canDeleteStyleProvider = FutureProvider.family<bool, String>((
+  ref,
+  id,
+) async {
+  final repository = ref.watch(styleRepositoryProvider);
+  return repository.canDeleteStyle(id);
+});
+
+/// Provider for unique designers
+final styleDesignersProvider = FutureProvider<List<String>>((ref) async {
+  final repository = ref.watch(styleRepositoryProvider);
+  return repository.getUniqueDesigners();
 });

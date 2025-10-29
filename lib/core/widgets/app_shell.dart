@@ -159,7 +159,7 @@ class _NavigationDrawer extends ConsumerWidget {
             isSelected: currentIndex == 2,
             onTap: () {
               ref.read(bottomNavIndexProvider.notifier).state = 2;
-              context.go(AppRouter.dispatch);
+              context.go(AppRouter.dispatchesList);
               Navigator.pop(context);
             },
           ),

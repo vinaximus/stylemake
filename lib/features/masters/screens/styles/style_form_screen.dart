@@ -21,6 +21,7 @@ class StyleFormScreen extends ConsumerStatefulWidget {
 class _StyleFormScreenState extends ConsumerState<StyleFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  final _designerController = TextEditingController();
 
   bool _isLoading = true;
   bool _isSaving = false;
@@ -40,6 +41,7 @@ class _StyleFormScreenState extends ConsumerState<StyleFormScreen> {
   @override
   void dispose() {
     _nameController.dispose();
+    _designerController.dispose();
     super.dispose();
   }
 
@@ -51,6 +53,7 @@ class _StyleFormScreenState extends ConsumerState<StyleFormScreen> {
       if (style != null && mounted) {
         setState(() {
           _nameController.text = style.name;
+          _designerController.text = style.designer ?? '';
           _isLoading = false;
         });
       } else {
@@ -77,15 +80,24 @@ class _StyleFormScreenState extends ConsumerState<StyleFormScreen> {
     try {
       final repository = ref.read(styleRepositoryProvider);
       final name = _nameController.text.trim();
+      final designer = _designerController.text.trim().isEmpty
+          ? null
+          : _designerController.text.trim();
 
       if (_isEditMode) {
-        await repository.updateStyle(id: widget.styleId!, name: name);
+        await repository.updateStyle(
+          id: widget.styleId!,
+          name: name,
+          designer: designer,
+        );
       } else {
-        await repository.createStyle(name: name);
+        await repository.createStyle(name: name, designer: designer);
       }
 
       if (mounted) {
+        // Invalidate providers to refresh the list
         ref.invalidate(stylesListProvider);
+        ref.invalidate(filteredStylesProvider);
         SnackbarUtils.showSuccess(
           context,
           _isEditMode
@@ -130,6 +142,20 @@ class _StyleFormScreenState extends ConsumerState<StyleFormScreen> {
                               3,
                               'Minimum 3 characters required',
                             ),
+                            Validators.maxLength(
+                              100,
+                              'Maximum 100 characters allowed',
+                            ),
+                          ]),
+                          enabled: !_isSaving,
+                          textCapitalization: TextCapitalization.words,
+                        ),
+                        const SizedBox(height: LayoutConstants.spaceMedium),
+                        TextInputField(
+                          controller: _designerController,
+                          label: 'Designer (Optional)',
+                          hint: 'e.g., John Smith, Fashion House',
+                          validator: Validators.compose([
                             Validators.maxLength(
                               100,
                               'Maximum 100 characters allowed',
