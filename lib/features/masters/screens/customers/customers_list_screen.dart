@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import 'package:stylemake/core/constants/layout_constants.dart';
 import 'package:stylemake/core/models/customer.dart';
 import 'package:stylemake/core/router/app_router.dart';
+import 'package:stylemake/core/utils/snackbar_utils.dart';
+import 'package:stylemake/core/widgets/app_fab.dart';
+import 'package:stylemake/core/widgets/dialogs/confirm_dialog.dart';
+import 'package:stylemake/core/widgets/list_card_item.dart';
 import 'package:stylemake/core/widgets/responsive_center.dart';
 import 'package:stylemake/features/masters/providers/customer_providers.dart';
 
@@ -10,21 +17,39 @@ class CustomersListScreen extends ConsumerStatefulWidget {
   const CustomersListScreen({super.key});
 
   @override
-  ConsumerState<CustomersListScreen> createState() => _CustomersListScreenState();
+  ConsumerState<CustomersListScreen> createState() =>
+      _CustomersListScreenState();
 }
 
-class _CustomersListScreenState extends ConsumerState<CustomersListScreen> {
+class _CustomersListScreenState extends ConsumerState<CustomersListScreen>
+    with WidgetsBindingObserver {
   final TextEditingController _searchController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _searchController.dispose();
     super.dispose();
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // Refresh the list when the app becomes active
+      ref.invalidate(customersListProvider);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final customers = ref.watch(filteredCustomersProvider);
+    final customersAsync = ref.watch(customersListProvider);
+    final filteredCustomers = ref.watch(filteredCustomersProvider);
     final searchQuery = ref.watch(customerSearchQueryProvider);
 
     return Scaffold(
@@ -33,7 +58,7 @@ class _CustomersListScreenState extends ConsumerState<CustomersListScreen> {
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(60),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(LayoutConstants.paddingMedium),
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
@@ -44,12 +69,15 @@ class _CustomersListScreenState extends ConsumerState<CustomersListScreen> {
                         icon: const Icon(Icons.clear),
                         onPressed: () {
                           _searchController.clear();
-                          ref.read(customerSearchQueryProvider.notifier).state = '';
+                          ref.read(customerSearchQueryProvider.notifier).state =
+                              '';
                         },
                       )
                     : null,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(
+                    LayoutConstants.radiusSmall,
+                  ),
                 ),
                 filled: true,
                 fillColor: Theme.of(context).cardColor,
@@ -61,92 +89,101 @@ class _CustomersListScreenState extends ConsumerState<CustomersListScreen> {
           ),
         ),
       ),
-      body: ResponsiveCenter(
-        child: _buildCustomersList(customers),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(customersListProvider);
+        },
+        child: customersAsync.when(
+          data: (customers) {
+            if (customers.isEmpty) {
+              return _buildEmptyState(context);
+            }
+
+            if (filteredCustomers.isEmpty && searchQuery.isNotEmpty) {
+              return _buildNoResultsState(context, searchQuery);
+            }
+
+            return ResponsiveListContainer(
+              child: ListView.builder(
+                padding: const EdgeInsets.all(LayoutConstants.paddingMedium),
+                itemCount: filteredCustomers.length,
+                itemBuilder: (context, index) {
+                  final customer = filteredCustomers[index];
+                  return _buildCustomerCard(customer);
+                },
+              ),
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stack) => _buildErrorState(context, ref, error),
+        ),
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: AppFab(
         onPressed: () {
-          Navigator.of(context).pushNamed(AppRouter.customersAdd);
+          context.push(AppRouter.customersAdd);
         },
-        child: const Icon(Icons.add),
-      ),
-    );
-  }
-
-  Widget _buildCustomersList(List<Customer> customers) {
-    if (customers.isEmpty) {
-      return _buildEmptyState();
-    }
-
-    return RefreshIndicator(
-      onRefresh: () async {
-        // Refresh is handled automatically by the stream
-      },
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: customers.length,
-        itemBuilder: (context, index) {
-          final customer = customers[index];
-          return _buildCustomerCard(customer);
-        },
+        label: 'Add Customer',
+        icon: Icons.add,
       ),
     );
   }
 
   Widget _buildCustomerCard(Customer customer) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: Theme.of(context).primaryColor,
-          child: Text(
-            customer.customerName.isNotEmpty 
-                ? customer.customerName[0].toUpperCase()
-                : 'C',
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
+    return ListCardItem(
+      title: customer.customerName,
+      subtitle: _buildSubtitleText(customer),
+      leading: CircleAvatar(
+        backgroundColor: Theme.of(context).primaryColor,
+        child: Text(
+          customer.customerName.isNotEmpty
+              ? customer.customerName[0].toUpperCase()
+              : 'C',
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
           ),
         ),
-        title: Text(customer.customerName),
-        subtitle: _buildSubtitle(customer),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: () {
-                Navigator.of(context).pushNamed(
-                  AppRouter.customersEdit(customer.id),
-                );
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete),
-              onPressed: () => _showDeleteDialog(customer),
-            ),
-          ],
-        ),
       ),
+      trailing: [
+        IconButton(
+          icon: const Icon(Icons.edit),
+          onPressed: () {
+            context.push(AppRouter.customersEdit(customer.id));
+          },
+          tooltip: 'Edit',
+        ),
+        IconButton(
+          icon: const Icon(Icons.delete),
+          onPressed: () =>
+              _deleteCustomer(context, ref, customer.id, customer.customerName),
+          tooltip: 'Delete',
+        ),
+      ],
+      onTap: () {
+        // Could navigate to detail view in future
+      },
     );
   }
 
-  Widget _buildSubtitle(Customer customer) {
+  String _buildSubtitleText(Customer customer) {
     final parts = <String>[];
-    
+
     if (customer.contactPerson != null && customer.contactPerson!.isNotEmpty) {
       parts.add(customer.contactPerson!);
     }
-    
+
     if (customer.phone != null && customer.phone!.isNotEmpty) {
       parts.add(customer.phone!);
     }
 
-    return Text(parts.join(' • '));
+    if (parts.isEmpty) {
+      return 'Created: ${DateFormat('MMM dd, yyyy').format(customer.createdAt)}';
+    }
+
+    return '${parts.join(' • ')} • Created: ${DateFormat('MMM dd, yyyy').format(customer.createdAt)}';
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -156,14 +193,14 @@ class _CustomersListScreenState extends ConsumerState<CustomersListScreen> {
             size: 64,
             color: Theme.of(context).disabledColor,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: LayoutConstants.spaceMedium),
           Text(
             'No customers found',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
               color: Theme.of(context).disabledColor,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: LayoutConstants.spaceSmall),
           Text(
             'Add your first customer to get started',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -175,56 +212,101 @@ class _CustomersListScreenState extends ConsumerState<CustomersListScreen> {
     );
   }
 
-
-  void _showDeleteDialog(Customer customer) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Customer'),
-        content: Text(
-          'Are you sure you want to delete "${customer.customerName}"? This action cannot be undone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+  Widget _buildNoResultsState(BuildContext context, String query) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.search_off,
+            size: 80,
+            color: Theme.of(context).colorScheme.outline,
           ),
-          TextButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await _deleteCustomer(customer);
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.error,
+          const SizedBox(height: LayoutConstants.spaceLarge),
+          Text(
+            'No results found',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: LayoutConstants.spaceSmall),
+          Text(
+            'No customers match "$query"',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
-            child: const Text('Delete'),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
     );
   }
 
-  Future<void> _deleteCustomer(Customer customer) async {
+  Widget _buildErrorState(BuildContext context, WidgetRef ref, Object error) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.error_outline,
+            size: 64,
+            color: Theme.of(context).colorScheme.error,
+          ),
+          const SizedBox(height: LayoutConstants.spaceMedium),
+          Text(
+            'Something went wrong',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              color: Theme.of(context).colorScheme.error,
+            ),
+          ),
+          const SizedBox(height: LayoutConstants.spaceSmall),
+          Text(
+            'Failed to load customers: $error',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: LayoutConstants.spaceLarge),
+          ElevatedButton(
+            onPressed: () {
+              ref.invalidate(customersListProvider);
+            },
+            child: const Text('Retry'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _deleteCustomer(
+    BuildContext context,
+    WidgetRef ref,
+    String id,
+    String name,
+  ) async {
+    final confirmed = await showDeleteConfirmDialog(
+      context: context,
+      itemName: name,
+    );
+
+    if (!confirmed) return;
+
     try {
       final repository = ref.read(customerRepositoryProvider);
-      await repository.deleteCustomer(customer.id);
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Customer "${customer.customerName}" deleted successfully'),
-            backgroundColor: Colors.green,
-          ),
+      await repository.deleteCustomer(id);
+
+      // Invalidate providers to refresh the list
+      ref.invalidate(customersListProvider);
+      ref.invalidate(filteredCustomersProvider);
+
+      if (context.mounted) {
+        SnackbarUtils.showSuccess(
+          context,
+          'Customer "$name" deleted successfully',
         );
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to delete customer: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+      if (context.mounted) {
+        SnackbarUtils.showError(context, 'Failed to delete customer: $e');
       }
     }
   }

@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:stylemake/core/constants/layout_constants.dart';
 import 'package:stylemake/core/widgets/responsive_center.dart';
 import 'package:stylemake/features/masters/providers/customer_providers.dart';
 
 /// Screen for adding or editing a customer
 class CustomerFormScreen extends ConsumerStatefulWidget {
-  const CustomerFormScreen({
-    super.key,
-    this.customerId,
-  });
+  const CustomerFormScreen({super.key, this.customerId});
 
   final String? customerId;
 
@@ -49,8 +47,10 @@ class _CustomerFormScreenState extends ConsumerState<CustomerFormScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final customerAsync = await ref.read(customerProvider(widget.customerId!).future);
-      
+      final customerAsync = await ref.read(
+        customerProvider(widget.customerId!).future,
+      );
+
       if (customerAsync != null && mounted) {
         _customerNameController.text = customerAsync.customerName;
         _contactPersonController.text = customerAsync.contactPerson ?? '';
@@ -80,7 +80,9 @@ class _CustomerFormScreenState extends ConsumerState<CustomerFormScreen> {
     if (_isLoading) {
       return Scaffold(
         appBar: AppBar(
-          title: Text(widget.customerId == null ? 'Add Customer' : 'Edit Customer'),
+          title: Text(
+            widget.customerId == null ? 'Add Customer' : 'Edit Customer',
+          ),
         ),
         body: const Center(child: CircularProgressIndicator()),
       );
@@ -88,7 +90,9 @@ class _CustomerFormScreenState extends ConsumerState<CustomerFormScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.customerId == null ? 'Add Customer' : 'Edit Customer'),
+        title: Text(
+          widget.customerId == null ? 'Add Customer' : 'Edit Customer',
+        ),
         actions: [
           TextButton(
             onPressed: _isSaving ? null : _saveCustomer,
@@ -102,22 +106,22 @@ class _CustomerFormScreenState extends ConsumerState<CustomerFormScreen> {
           ),
         ],
       ),
-      body: ResponsiveCenter(
+      body: ResponsiveFormContainer(
         child: Form(
           key: _formKey,
           child: ListView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(LayoutConstants.paddingMedium),
             children: [
               _buildCustomerNameField(),
-              const SizedBox(height: 16),
+              const SizedBox(height: LayoutConstants.spaceMedium),
               _buildContactPersonField(),
-              const SizedBox(height: 16),
+              const SizedBox(height: LayoutConstants.spaceMedium),
               _buildPhoneField(),
-              const SizedBox(height: 16),
+              const SizedBox(height: LayoutConstants.spaceMedium),
               _buildAddressField(),
-              const SizedBox(height: 16),
+              const SizedBox(height: LayoutConstants.spaceMedium),
               _buildGstNoField(),
-              const SizedBox(height: 32),
+              const SizedBox(height: LayoutConstants.spaceXLarge),
               _buildActionButtons(),
             ],
           ),
@@ -217,7 +221,9 @@ class _CustomerFormScreenState extends ConsumerState<CustomerFormScreen> {
       validator: (value) {
         if (value != null && value.trim().isNotEmpty) {
           // Basic GST validation - 15 characters, alphanumeric
-          final gstRegex = RegExp(r'^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$');
+          final gstRegex = RegExp(
+            r'^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$',
+          );
           if (!gstRegex.hasMatch(value.trim().toUpperCase())) {
             return 'Please enter a valid GST number';
           }
@@ -236,7 +242,7 @@ class _CustomerFormScreenState extends ConsumerState<CustomerFormScreen> {
             child: const Text('Cancel'),
           ),
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: LayoutConstants.spaceMedium),
         Expanded(
           child: ElevatedButton(
             onPressed: _isSaving ? null : _saveCustomer,
@@ -246,7 +252,11 @@ class _CustomerFormScreenState extends ConsumerState<CustomerFormScreen> {
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : Text(widget.customerId == null ? 'Add Customer' : 'Update Customer'),
+                : Text(
+                    widget.customerId == null
+                        ? 'Add Customer'
+                        : 'Update Customer',
+                  ),
           ),
         ),
       ],
@@ -260,25 +270,28 @@ class _CustomerFormScreenState extends ConsumerState<CustomerFormScreen> {
 
     try {
       final repository = ref.read(customerRepositoryProvider);
-      
+
       final customerData = {
         'customer_name': _customerNameController.text.trim(),
-        'contact_person': _contactPersonController.text.trim().isEmpty 
-            ? null 
+        'contact_person': _contactPersonController.text.trim().isEmpty
+            ? null
             : _contactPersonController.text.trim(),
-        'phone': _phoneController.text.trim().isEmpty 
-            ? null 
+        'phone': _phoneController.text.trim().isEmpty
+            ? null
             : _phoneController.text.trim(),
-        'address': _addressController.text.trim().isEmpty 
-            ? null 
+        'address': _addressController.text.trim().isEmpty
+            ? null
             : _addressController.text.trim(),
-        'gst_no': _gstNoController.text.trim().isEmpty 
-            ? null 
+        'gst_no': _gstNoController.text.trim().isEmpty
+            ? null
             : _gstNoController.text.trim().toUpperCase(),
       };
 
       if (widget.customerId == null) {
         await repository.createCustomer(customerData);
+        // Invalidate providers to refresh the list
+        ref.invalidate(customersListProvider);
+        ref.invalidate(filteredCustomersProvider);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -289,6 +302,9 @@ class _CustomerFormScreenState extends ConsumerState<CustomerFormScreen> {
         }
       } else {
         await repository.updateCustomer(widget.customerId!, customerData);
+        // Invalidate providers to refresh the list
+        ref.invalidate(customersListProvider);
+        ref.invalidate(filteredCustomersProvider);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(

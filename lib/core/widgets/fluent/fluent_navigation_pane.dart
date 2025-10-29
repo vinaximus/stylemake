@@ -348,6 +348,11 @@ class FluentDefaultNavigationPane extends ConsumerWidget {
               label: 'Vendors',
               path: '/masters/vendors',
             ),
+            FluentNavigationChildItem(
+              icon: Icons.people,
+              label: 'Customers',
+              path: '/masters/customers',
+            ),
           ],
           onChildTap: onChildNavigation,
         ),

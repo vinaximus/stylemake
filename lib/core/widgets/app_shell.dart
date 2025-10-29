@@ -200,6 +200,14 @@ class _NavigationDrawer extends ConsumerWidget {
                 Navigator.pop(context);
               },
             ),
+            _DrawerChildMenuItem(
+              icon: Icons.people,
+              label: 'Customers',
+              onTap: () {
+                context.go(AppRouter.customersList);
+                Navigator.pop(context);
+              },
+            ),
           ],
           // Reports
           _DrawerMenuItem(
