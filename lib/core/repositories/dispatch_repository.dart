@@ -222,9 +222,18 @@ class DispatchRepository {
 
         // Create items
         if (itemsData.isNotEmpty) {
-          final itemsPayload = itemsData
-              .map((item) => ({...item, 'dispatch_id': master.id}))
-              .toList();
+          final itemsPayload = itemsData.map((item) {
+            // Filter only database fields - exclude display-only fields like 'style_name'
+            return {
+              'dispatch_id': master.id,
+              'style_id': item['style_id'],
+              'color': item['color'],
+              'size': item['size'],
+              'quantity': item['quantity'],
+              'rate': item['rate'],
+              'remarks': item['remarks'],
+            };
+          }).toList();
 
           await _supabaseService.client
               .from('dispatch_items')
@@ -287,9 +296,18 @@ class DispatchRepository {
 
       // Create new items
       if (itemsData.isNotEmpty) {
-        final itemsPayload = itemsData
-            .map((item) => ({...item, 'dispatch_id': id}))
-            .toList();
+        final itemsPayload = itemsData.map((item) {
+          // Filter only database fields - exclude display-only fields like 'style_name'
+          return {
+            'dispatch_id': id,
+            'style_id': item['style_id'],
+            'color': item['color'],
+            'size': item['size'],
+            'quantity': item['quantity'],
+            'rate': item['rate'],
+            'remarks': item['remarks'],
+          };
+        }).toList();
 
         await _supabaseService.client
             .from('dispatch_items')
