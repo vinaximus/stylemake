@@ -1,4 +1,5 @@
 import 'package:stylemake/core/models/fabrication_po.dart';
+import 'package:stylemake/core/repositories/po_order_item_repository.dart';
 import 'package:stylemake/core/services/supabase_service.dart';
 import 'package:stylemake/core/services/realtime_service.dart';
 import 'package:stylemake/core/utils/error_handler.dart';
@@ -7,6 +8,7 @@ import 'package:stylemake/core/utils/performance_monitor.dart';
 /// Repository for Fabrication Purchase Orders
 class FabricationPoRepository {
   final _supabase = SupabaseService.instance.client;
+  final _orderItemRepo = PoOrderItemRepository();
 
   // Default company and user IDs for v0.5 single-company mode
   static const String defaultCompanyId = '00000000-0000-0000-0000-000000000000';
@@ -81,7 +83,37 @@ class FabricationPoRepository {
 
       if (response == null) return null;
 
-      return FabricationPoWithDetails.fromJson(response);
+      final po = FabricationPoWithDetails.fromJson(response);
+      
+      // Fetch order items
+      try {
+        final orderItems = await _orderItemRepo.getOrderItemsByPo(id);
+        return FabricationPoWithDetails(
+          id: po.id,
+          poNumber: po.poNumber,
+          cuttingId: po.cuttingId,
+          jobOrderNo: po.jobOrderNo,
+          vendorId: po.vendorId,
+          fabricationType: po.fabricationType,
+          dateOfIssue: po.dateOfIssue,
+          completionDate: po.completionDate,
+          instructions: po.instructions,
+          companyId: po.companyId,
+          userId: po.userId,
+          createdAt: po.createdAt,
+          updatedAt: po.updatedAt,
+          cuttingRef: po.cuttingRef,
+          vendorName: po.vendorName,
+          styleName: po.styleName,
+          vendorGst: po.vendorGst,
+          vendorCity: po.vendorCity,
+          orderItems: orderItems,
+        );
+      } catch (e) {
+        // If order items fail to load, return PO without them
+        ErrorHandler.logError('getPoWithDetails - order items', e, StackTrace.current);
+        return po;
+      }
     } catch (e) {
       throw Exception('Failed to fetch PO: $e');
     }
@@ -218,8 +250,6 @@ class FabricationPoRepository {
     required String fabricationType,
     required DateTime dateOfIssue,
     DateTime? completionDate,
-    required int quantityIssued,
-    required double ratePerUnit,
     String? instructions,
   }) async {
     try {
@@ -231,8 +261,6 @@ class FabricationPoRepository {
         'fabrication_type': fabricationType,
         'date_of_issue': dateOfIssue.toIso8601String().split('T')[0],
         'completion_date': completionDate?.toIso8601String().split('T')[0],
-        'quantity_issued': quantityIssued,
-        'rate_per_unit': ratePerUnit,
         'instructions': instructions,
         'company_id': _companyId,
         'user_id': _userId,
@@ -259,8 +287,6 @@ class FabricationPoRepository {
     required String fabricationType,
     required DateTime dateOfIssue,
     DateTime? completionDate,
-    required int quantityIssued,
-    required double ratePerUnit,
     String? instructions,
   }) async {
     try {
@@ -271,8 +297,6 @@ class FabricationPoRepository {
         'fabrication_type': fabricationType,
         'date_of_issue': dateOfIssue.toIso8601String().split('T')[0],
         'completion_date': completionDate?.toIso8601String().split('T')[0],
-        'quantity_issued': quantityIssued,
-        'rate_per_unit': ratePerUnit,
         'instructions': instructions,
       };
 

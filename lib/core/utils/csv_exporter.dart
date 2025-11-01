@@ -62,9 +62,8 @@ class CsvExporter {
         'Completion Date': po.completionDate != null
             ? DateFormat('yyyy-MM-dd').format(po.completionDate!)
             : '',
-        'Quantity Issued': po.quantityIssued,
-        'Rate per Unit': po.ratePerUnit.toStringAsFixed(2),
-        'Total': (po.quantityIssued * po.ratePerUnit).toStringAsFixed(2),
+        'Order Items Count': po.orderItems != null ? po.orderItems!.length : 0,
+        'Total': po.totalAmountFromItems.toStringAsFixed(2),
         'Instructions': po.instructions ?? '',
       };
     }).toList();

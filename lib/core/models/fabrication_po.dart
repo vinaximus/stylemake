@@ -1,3 +1,5 @@
+import 'package:stylemake/core/models/po_order_item.dart';
+
 /// Fabrication Purchase Order model
 class FabricationPo {
   FabricationPo({
@@ -9,8 +11,6 @@ class FabricationPo {
     required this.fabricationType,
     required this.dateOfIssue,
     this.completionDate,
-    required this.quantityIssued,
-    required this.ratePerUnit,
     this.instructions,
     required this.companyId,
     required this.userId,
@@ -30,8 +30,6 @@ class FabricationPo {
       completionDate: json['completion_date'] != null
           ? DateTime.parse(json['completion_date'] as String)
           : null,
-      quantityIssued: json['quantity_issued'] as int,
-      ratePerUnit: (json['rate_per_unit'] as num).toDouble(),
       instructions: json['instructions'] as String?,
       companyId: json['company_id'] as String,
       userId: json['user_id'] as String,
@@ -48,8 +46,6 @@ class FabricationPo {
   final String fabricationType; // 'Embroidery' or 'Stitching & Finishing'
   final DateTime dateOfIssue;
   final DateTime? completionDate;
-  final int quantityIssued;
-  final double ratePerUnit;
   final String? instructions;
   final String companyId;
   final String userId;
@@ -66,8 +62,6 @@ class FabricationPo {
       'fabrication_type': fabricationType,
       'date_of_issue': dateOfIssue.toIso8601String().split('T')[0], // DATE
       'completion_date': completionDate?.toIso8601String().split('T')[0],
-      'quantity_issued': quantityIssued,
-      'rate_per_unit': ratePerUnit,
       'instructions': instructions,
       'company_id': companyId,
       'user_id': userId,
@@ -85,8 +79,6 @@ class FabricationPo {
     String? fabricationType,
     DateTime? dateOfIssue,
     DateTime? completionDate,
-    int? quantityIssued,
-    double? ratePerUnit,
     String? instructions,
     String? companyId,
     String? userId,
@@ -102,8 +94,6 @@ class FabricationPo {
       fabricationType: fabricationType ?? this.fabricationType,
       dateOfIssue: dateOfIssue ?? this.dateOfIssue,
       completionDate: completionDate ?? this.completionDate,
-      quantityIssued: quantityIssued ?? this.quantityIssued,
-      ratePerUnit: ratePerUnit ?? this.ratePerUnit,
       instructions: instructions ?? this.instructions,
       companyId: companyId ?? this.companyId,
       userId: userId ?? this.userId,
@@ -111,9 +101,6 @@ class FabricationPo {
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
-
-  /// Calculate total amount
-  double get totalAmount => quantityIssued * ratePerUnit;
 
   @override
   String toString() {
@@ -144,8 +131,6 @@ class FabricationPoWithDetails extends FabricationPo {
     required super.fabricationType,
     required super.dateOfIssue,
     super.completionDate,
-    required super.quantityIssued,
-    required super.ratePerUnit,
     super.instructions,
     required super.companyId,
     required super.userId,
@@ -156,6 +141,7 @@ class FabricationPoWithDetails extends FabricationPo {
     required this.styleName,
     this.vendorGst,
     this.vendorCity,
+    this.orderItems,
   });
 
   factory FabricationPoWithDetails.fromJson(Map<String, dynamic> json) {
@@ -175,8 +161,6 @@ class FabricationPoWithDetails extends FabricationPo {
       completionDate: json['completion_date'] != null
           ? DateTime.parse(json['completion_date'] as String)
           : null,
-      quantityIssued: json['quantity_issued'] as int,
-      ratePerUnit: (json['rate_per_unit'] as num).toDouble(),
       instructions: json['instructions'] as String?,
       companyId: json['company_id'] as String,
       userId: json['user_id'] as String,
@@ -195,6 +179,18 @@ class FabricationPoWithDetails extends FabricationPo {
   final String styleName;
   final String? vendorGst;
   final String? vendorCity;
+  final List<PoOrderItem>? orderItems;
+
+  /// Calculate total amount from order items
+  double get totalAmountFromItems {
+    if (orderItems != null && orderItems!.isNotEmpty) {
+      return orderItems!.fold<double>(
+        0,
+        (sum, item) => sum + item.totalAmount,
+      );
+    }
+    return 0.0; // No items, no total
+  }
 
   @override
   String toString() {

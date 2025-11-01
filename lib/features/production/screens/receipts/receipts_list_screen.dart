@@ -8,6 +8,7 @@ import 'package:stylemake/core/providers/receipt_providers.dart';
 import 'package:stylemake/core/utils/csv_exporter.dart';
 import 'package:stylemake/core/utils/snackbar_utils.dart';
 import 'package:stylemake/core/widgets/responsive_center.dart';
+import 'package:stylemake/core/widgets/dialogs/confirm_dialog.dart';
 import 'package:stylemake/core/router/app_router.dart';
 
 class ReceiptsListScreen extends ConsumerWidget {
@@ -77,28 +78,28 @@ class ReceiptsListScreen extends ConsumerWidget {
                   : ListView.separated(
                       itemBuilder: (context, index) {
                         final r = receipts[index];
-                        return InkWell(
-                          onTap: () =>
-                              context.push(AppRouter.receiptsEdit(r.id)),
-                          child: Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: theme.colorScheme.outline.withOpacity(
-                                  0.5,
-                                ),
+                        return Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: theme.colorScheme.outline.withOpacity(
+                                0.5,
                               ),
-                              borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.inventory_2,
-                                  size: 20,
-                                  color: theme.colorScheme.primary,
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.inventory_2,
+                                size: 20,
+                                color: theme.colorScheme.primary,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: InkWell(
+                                  onTap: () =>
+                                      context.push(AppRouter.receiptsEdit(r.id)),
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
@@ -130,12 +131,24 @@ class ReceiptsListScreen extends ConsumerWidget {
                                     ],
                                   ),
                                 ),
-                                Icon(
-                                  Icons.chevron_right,
-                                  color: theme.colorScheme.outline,
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.edit, size: 20),
+                                onPressed: () =>
+                                    context.push(AppRouter.receiptsEdit(r.id)),
+                                tooltip: 'Edit',
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete, size: 20),
+                                onPressed: () => _deleteReceipt(
+                                  context,
+                                  ref,
+                                  r.id,
+                                  r.receiptId,
                                 ),
-                              ],
-                            ),
+                                tooltip: 'Delete',
+                              ),
+                            ],
                           ),
                         );
                       },
@@ -152,6 +165,38 @@ class ReceiptsListScreen extends ConsumerWidget {
         child: const Icon(Icons.add),
       ),
     );
+  }
+}
+
+/// Delete a receipt
+Future<void> _deleteReceipt(
+  BuildContext context,
+  WidgetRef ref,
+  String receiptId,
+  String receiptIdDisplay,
+) async {
+  final confirmed = await showDeleteConfirmDialog(
+    context: context,
+    itemName: receiptIdDisplay,
+  );
+
+  if (!confirmed || !context.mounted) return;
+
+  try {
+    final repository = ref.read(receiptRepositoryProvider);
+    await repository.deleteReceipt(receiptId);
+
+    if (context.mounted) {
+      SnackbarUtils.showSuccess(context, 'Receipt deleted successfully');
+      ref.invalidate(receiptsListProvider);
+    }
+  } catch (e) {
+    if (context.mounted) {
+      SnackbarUtils.showError(
+        context,
+        'Failed to delete receipt: ${e.toString()}',
+      );
+    }
   }
 }
 

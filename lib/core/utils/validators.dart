@@ -249,4 +249,23 @@ class Validators {
       return null;
     };
   }
+
+  /// Non-negative decimal validator (>= 0, with up to 2 decimal places)
+  static String? Function(String?) nonNegativeDecimal([String? message]) {
+    return (value) {
+      if (value == null || value.isEmpty) {
+        return message ?? 'This field is required';
+      }
+      final number = double.tryParse(value);
+      if (number == null || number < 0) {
+        return message ?? 'Please enter a non-negative number (0 or greater)';
+      }
+      // Check for max 2 decimal places
+      final parts = value.split('.');
+      if (parts.length > 1 && parts[1].length > 2) {
+        return 'Maximum 2 decimal places allowed';
+      }
+      return null;
+    };
+  }
 }

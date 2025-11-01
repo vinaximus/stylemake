@@ -268,7 +268,9 @@ class CuttingDetailScreen extends ConsumerWidget {
                                                       maxLines: 2,
                                                     ),
                                                     Text(
-                                                      'Qty: ${po.quantityIssued} • ₹${po.totalAmount.toStringAsFixed(2)}',
+                                                      po.orderItems != null && po.orderItems!.isNotEmpty
+                                                          ? '${po.orderItems!.length} item(s) • ₹${po.totalAmountFromItems.toStringAsFixed(2)}'
+                                                          : 'No items • ₹0.00',
                                                       style: theme
                                                           .textTheme
                                                           .bodySmall

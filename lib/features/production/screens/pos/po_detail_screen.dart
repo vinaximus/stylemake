@@ -27,6 +27,32 @@ class PoDetailScreen extends ConsumerWidget {
         title: const Text('PO Details'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.picture_as_pdf),
+            onPressed: () async {
+              final po = ref.read(poByIdProvider(poId)).value;
+              if (po != null) {
+                try {
+                  await PdfGenerator.generateAndShowPoPdf(context, po);
+                } catch (e) {
+                  if (context.mounted) {
+                    SnackbarUtils.showError(
+                      context,
+                      'Failed to generate PDF: ${e.toString()}',
+                    );
+                  }
+                }
+              } else {
+                if (context.mounted) {
+                  SnackbarUtils.showError(
+                    context,
+                    'PO data not available',
+                  );
+                }
+              }
+            },
+            tooltip: 'Print/Export',
+          ),
+          IconButton(
             icon: const Icon(Icons.edit),
             onPressed: () {
               context.push(AppRouter.posEditPath(poId));
@@ -209,7 +235,7 @@ class PoDetailScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: LayoutConstants.spaceMedium),
 
-                  // Quantity & Rate Card
+                  // Order Items Card
                   Card(
                     child: Padding(
                       padding: const EdgeInsets.all(
@@ -219,23 +245,112 @@ class PoDetailScreen extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Quantity & Rate',
+                            'Order Items',
                             style: theme.textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           const Divider(height: 24),
-                          _InfoRow(
-                            icon: Icons.inventory_2_outlined,
-                            label: 'Quantity Issued',
-                            value: '${po.quantityIssued} pcs',
-                          ),
-                          const SizedBox(height: LayoutConstants.spaceSmall),
-                          _InfoRow(
-                            icon: Icons.currency_rupee,
-                            label: 'Rate per Unit',
-                            value: '₹${po.ratePerUnit.toStringAsFixed(2)}',
-                          ),
+                          if (po.orderItems != null && po.orderItems!.isNotEmpty)
+                            ...po.orderItems!.map((item) {
+                              return Padding(
+                                padding: const EdgeInsets.only(
+                                  bottom: LayoutConstants.spaceMedium,
+                                ),
+                                child: Card(
+                                  color: theme.colorScheme.surfaceVariant
+                                      .withOpacity(0.3),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(
+                                      LayoutConstants.paddingMedium,
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          item.orderDescription,
+                                          style: theme.textTheme.titleSmall
+                                              ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(
+                                          height: LayoutConstants.spaceSmall,
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                'Qty: ${item.quantity} × ₹${item.rate.toStringAsFixed(2)}',
+                                                style: theme.textTheme.bodyMedium,
+                                              ),
+                                            ),
+                                            Text(
+                                              '₹${item.totalAmount.toStringAsFixed(2)}',
+                                              style: theme.textTheme.titleMedium
+                                                  ?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                                color:
+                                                    theme.colorScheme.primary,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        if (item.note != null &&
+                                            item.note!.isNotEmpty) ...[
+                                          const SizedBox(
+                                            height: LayoutConstants.spaceSmall,
+                                          ),
+                                          Text(
+                                            'Note: ${item.note}',
+                                            style: theme.textTheme.bodySmall
+                                                ?.copyWith(
+                                              color: theme.colorScheme
+                                                  .onSurfaceVariant,
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            })
+                          else
+                            Padding(
+                              padding: const EdgeInsets.all(
+                                LayoutConstants.paddingLarge,
+                              ),
+                              child: Column(
+                                children: [
+                                  Icon(
+                                    Icons.inventory_2_outlined,
+                                    size: 48,
+                                    color: theme.colorScheme.outline,
+                                  ),
+                                  const SizedBox(
+                                    height: LayoutConstants.spaceMedium,
+                                  ),
+                                  Text(
+                                    'No order items',
+                                    style: theme.textTheme.titleMedium,
+                                  ),
+                                  const SizedBox(
+                                    height: LayoutConstants.spaceSmall,
+                                  ),
+                                  Text(
+                                    'Add order items to this PO',
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      color:
+                                          theme.colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           const Divider(height: 24),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -252,7 +367,7 @@ class PoDetailScreen extends ConsumerWidget {
                               const SizedBox(width: 8),
                               Flexible(
                                 child: Text(
-                                  '₹${po.totalAmount.toStringAsFixed(2)}',
+                                  '₹${po.totalAmountFromItems.toStringAsFixed(2)}',
                                   style: theme.textTheme.headlineMedium
                                       ?.copyWith(
                                         fontWeight: FontWeight.bold,
@@ -295,26 +410,6 @@ class PoDetailScreen extends ConsumerWidget {
                         ),
                       ),
                     ),
-
-                  const SizedBox(height: LayoutConstants.spaceMedium),
-
-                  // Export to PDF Button
-                  FilledButton.icon(
-                    onPressed: () async {
-                      try {
-                        await PdfGenerator.generateAndShowPoPdf(po);
-                      } catch (e) {
-                        if (context.mounted) {
-                          SnackbarUtils.showError(
-                            context,
-                            'Failed to generate PDF: ${e.toString()}',
-                          );
-                        }
-                      }
-                    },
-                    icon: const Icon(Icons.picture_as_pdf),
-                    label: const Text('Export to PDF'),
-                  ),
 
                   const SizedBox(height: LayoutConstants.spaceLarge),
 

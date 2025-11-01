@@ -394,7 +394,9 @@ class _PoCard extends ConsumerWidget {
                       ),
                     ),
                     Text(
-                      'Qty: ${po.quantityIssued} • Rate: ₹${po.ratePerUnit.toStringAsFixed(2)} • Total: ₹${po.totalAmount.toStringAsFixed(2)}',
+                      po.orderItems != null && po.orderItems!.isNotEmpty
+                          ? '${po.orderItems!.length} item(s) • Total: ₹${po.totalAmountFromItems.toStringAsFixed(2)}'
+                          : 'No items • Total: ₹0.00',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w500,

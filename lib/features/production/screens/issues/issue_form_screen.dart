@@ -275,7 +275,7 @@ class _IssueFormScreenState extends ConsumerState<IssueFormScreen> {
                   hint: 'Enter rate',
                   validator: Validators.compose([
                     Validators.required('Rate is required'),
-                    Validators.positiveDecimal(),
+                    Validators.nonNegativeDecimal(),
                   ]),
                   onChanged: (value) {
                     setState(() {}); // Recalculate total

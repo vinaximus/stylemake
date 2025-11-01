@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:stylemake/core/constants/layout_constants.dart';
 import 'package:stylemake/core/models/fabrication_po.dart';
 import 'package:stylemake/core/providers/dropdown_providers.dart';
+import 'package:stylemake/core/repositories/po_order_item_repository.dart';
 import 'package:stylemake/core/utils/snackbar_utils.dart';
 import 'package:stylemake/core/utils/validators.dart';
 import 'package:stylemake/core/widgets/form/date_picker_field.dart';
@@ -24,19 +25,57 @@ class PoFormScreen extends ConsumerStatefulWidget {
   ConsumerState<PoFormScreen> createState() => _PoFormScreenState();
 }
 
+class _OrderItemForm {
+  final TextEditingController descriptionController;
+  final TextEditingController quantityController;
+  final TextEditingController rateController;
+  final TextEditingController noteController;
+  final GlobalKey<FormState> formKey;
+
+  _OrderItemForm()
+      : descriptionController = TextEditingController(),
+        quantityController = TextEditingController(),
+        rateController = TextEditingController(),
+        noteController = TextEditingController(),
+        formKey = GlobalKey<FormState>();
+
+  void dispose() {
+    descriptionController.dispose();
+    quantityController.dispose();
+    rateController.dispose();
+    noteController.dispose();
+  }
+
+  bool validate() {
+    return formKey.currentState?.validate() ?? false;
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'order_description': descriptionController.text.trim(),
+      'quantity': int.parse(quantityController.text),
+      'rate': double.parse(rateController.text),
+      'note': noteController.text.trim().isEmpty
+          ? null
+          : noteController.text.trim(),
+      'display_order': 0,
+    };
+  }
+}
+
 class _PoFormScreenState extends ConsumerState<PoFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _poNumberController = TextEditingController();
   final _jobOrderNoController = TextEditingController();
   final _issueDateController = TextEditingController();
   final _completionDateController = TextEditingController();
-  final _quantityController = TextEditingController();
-  final _rateController = TextEditingController();
   final _instructionsController = TextEditingController();
 
   String? _selectedCuttingId;
   String? _selectedVendorId;
   String? _selectedFabricationType;
+
+  final List<_OrderItemForm> _orderItems = [];
 
   bool _isLoading = true;
   bool _isSaving = false;
@@ -63,6 +102,8 @@ class _PoFormScreenState extends ConsumerState<PoFormScreen> {
       }
       // Set default issue date to today
       _issueDateController.text = _dateFormat.format(DateTime.now());
+      // Add one empty order item by default
+      _addOrderItem();
       setState(() => _isLoading = false);
     }
   }
@@ -95,9 +136,22 @@ class _PoFormScreenState extends ConsumerState<PoFormScreen> {
           );
         }
 
-        _quantityController.text = po.quantityIssued.toString();
-        _rateController.text = po.ratePerUnit.toStringAsFixed(2);
         _instructionsController.text = po.instructions ?? '';
+
+        // Load order items if available
+        if (po.orderItems != null && po.orderItems!.isNotEmpty) {
+          for (final item in po.orderItems!) {
+            final itemForm = _OrderItemForm();
+            itemForm.descriptionController.text = item.orderDescription;
+            itemForm.quantityController.text = item.quantity.toString();
+            itemForm.rateController.text = item.rate.toStringAsFixed(2);
+            itemForm.noteController.text = item.note ?? '';
+            _orderItems.add(itemForm);
+          }
+        } else {
+          // No order items - add one empty item
+          _addOrderItem();
+        }
       }
       setState(() => _isLoading = false);
     } catch (e) {
@@ -108,28 +162,64 @@ class _PoFormScreenState extends ConsumerState<PoFormScreen> {
     }
   }
 
+  void _addOrderItem() {
+    setState(() {
+      _orderItems.add(_OrderItemForm());
+    });
+  }
+
+  void _removeOrderItem(int index) {
+    setState(() {
+      _orderItems[index].dispose();
+      _orderItems.removeAt(index);
+    });
+  }
+
   @override
   void dispose() {
     _poNumberController.dispose();
     _jobOrderNoController.dispose();
     _issueDateController.dispose();
     _completionDateController.dispose();
-    _quantityController.dispose();
-    _rateController.dispose();
     _instructionsController.dispose();
+    for (final item in _orderItems) {
+      item.dispose();
+    }
     super.dispose();
   }
 
   Future<void> _savePo() async {
     if (!_formKey.currentState!.validate()) return;
 
+    // Validate all order items
+    bool allItemsValid = true;
+    for (final item in _orderItems) {
+      if (!item.validate()) {
+        allItemsValid = false;
+      }
+    }
+    if (!allItemsValid) {
+      SnackbarUtils.showError(
+        context,
+        'Please fix errors in order items',
+      );
+      return;
+    }
+
+    if (_orderItems.isEmpty) {
+      SnackbarUtils.showError(
+        context,
+        'Please add at least one order item',
+      );
+      return;
+    }
+
     setState(() => _isSaving = true);
 
     try {
       final repository = ref.read(poRepositoryProvider);
+      final orderItemRepo = PoOrderItemRepository();
 
-      final quantity = int.parse(_quantityController.text);
-      final rate = double.parse(_rateController.text);
       final instructions = _instructionsController.text.trim().isEmpty
           ? null
           : _instructionsController.text.trim();
@@ -140,21 +230,21 @@ class _PoFormScreenState extends ConsumerState<PoFormScreen> {
           ? _dateFormat.parse(_completionDateController.text)
           : null;
 
+      String poId;
       if (_isEditMode) {
+        poId = widget.poId!;
         await repository.updatePo(
-          id: widget.poId!,
+          id: poId,
           cuttingId: _selectedCuttingId!,
           jobOrderNo: _jobOrderNoController.text.trim(),
           vendorId: _selectedVendorId!,
           fabricationType: _selectedFabricationType!,
           dateOfIssue: issueDate,
           completionDate: completionDate,
-          quantityIssued: quantity,
-          ratePerUnit: rate,
           instructions: instructions,
         );
       } else {
-        await repository.createPo(
+        final po = await repository.createPo(
           poNumber: _poNumberController.text.trim(),
           cuttingId: _selectedCuttingId!,
           jobOrderNo: _jobOrderNoController.text.trim(),
@@ -162,17 +252,26 @@ class _PoFormScreenState extends ConsumerState<PoFormScreen> {
           fabricationType: _selectedFabricationType!,
           dateOfIssue: issueDate,
           completionDate: completionDate,
-          quantityIssued: quantity,
-          ratePerUnit: rate,
           instructions: instructions,
         );
+        poId = po.id;
       }
+
+      // Save order items
+      final orderItemsData = _orderItems
+          .map((item) => item.toMap())
+          .toList();
+      await orderItemRepo.replaceOrderItems(
+        poId: poId,
+        items: orderItemsData,
+      );
 
       // Refresh providers
       ref.invalidate(posListProvider);
       if (_selectedCuttingId != null) {
         ref.invalidate(posByCuttingProvider(_selectedCuttingId!));
       }
+      ref.invalidate(poByIdProvider(poId));
 
       if (mounted) {
         SnackbarUtils.showSuccess(
@@ -190,9 +289,13 @@ class _PoFormScreenState extends ConsumerState<PoFormScreen> {
   }
 
   double get _totalAmount {
-    final qty = int.tryParse(_quantityController.text) ?? 0;
-    final rate = double.tryParse(_rateController.text) ?? 0.0;
-    return qty * rate;
+    double total = 0.0;
+    for (final item in _orderItems) {
+      final qty = int.tryParse(item.quantityController.text) ?? 0;
+      final rate = double.tryParse(item.rateController.text) ?? 0.0;
+      total += qty * rate;
+    }
+    return total;
   }
 
   @override
@@ -323,76 +426,227 @@ class _PoFormScreenState extends ConsumerState<PoFormScreen> {
                 ),
                 const SizedBox(height: LayoutConstants.spaceMedium),
 
-                // Quantity Issued
-                TextInputField(
-                  controller: _quantityController,
-                  label: 'Quantity Issued *',
-                  keyboardType: TextInputType.number,
-                  prefixIcon: const Icon(Icons.inventory_2_outlined),
-                  hint: 'Enter quantity in pieces',
-                  validator: Validators.compose([
-                    Validators.required('Quantity is required'),
-                    Validators.positiveInteger(),
-                  ]),
-                  onChanged: (value) {
-                    setState(() {}); // Recalculate total
-                  },
-                ),
-                const SizedBox(height: LayoutConstants.spaceMedium),
-
-                // Rate per Unit
-                TextInputField(
-                  controller: _rateController,
-                  label: 'Rate per Unit *',
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  prefixIcon: const Icon(Icons.currency_rupee),
-                  hint: 'Enter rate in rupees',
-                  validator: Validators.compose([
-                    Validators.required('Rate is required'),
-                    Validators.positiveDecimal(),
-                  ]),
-                  onChanged: (value) {
-                    setState(() {}); // Recalculate total
-                  },
-                ),
-                const SizedBox(height: LayoutConstants.spaceSmall),
-
-                // Total Amount Display
-                Container(
-                  padding: const EdgeInsets.all(LayoutConstants.paddingMedium),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: theme.colorScheme.primary.withOpacity(0.5),
+                // Order Items Section
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(LayoutConstants.paddingLarge),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Order Items *',
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            FilledButton.tonalIcon(
+                              onPressed: _addOrderItem,
+                              icon: const Icon(Icons.add, size: 18),
+                              label: const Text('Add Item'),
+                              style: FilledButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: LayoutConstants.spaceMedium),
+                        if (_orderItems.isEmpty)
+                          Padding(
+                            padding: const EdgeInsets.all(
+                              LayoutConstants.paddingLarge,
+                            ),
+                            child: Center(
+                              child: Text(
+                                'No order items. Click "Add Item" to add one.',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                          )
+                        else
+                          ...List.generate(_orderItems.length, (index) {
+                            final item = _orderItems[index];
+                            return Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: LayoutConstants.spaceMedium,
+                              ),
+                              child: Card(
+                                color: theme.colorScheme.surfaceVariant
+                                    .withOpacity(0.3),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(
+                                    LayoutConstants.paddingMedium,
+                                  ),
+                                  child: Form(
+                                    key: item.formKey,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              'Item ${index + 1}',
+                                              style: theme.textTheme.titleSmall
+                                                  ?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            if (_orderItems.length > 1)
+                                              IconButton(
+                                                icon: const Icon(Icons.delete),
+                                                color: theme.colorScheme.error,
+                                                onPressed: () =>
+                                                    _removeOrderItem(index),
+                                                tooltip: 'Remove item',
+                                              ),
+                                          ],
+                                        ),
+                                        const SizedBox(
+                                          height: LayoutConstants.spaceSmall,
+                                        ),
+                                        // Order Description
+                                        TextInputField(
+                                          controller: item.descriptionController,
+                                          label: 'Order Description *',
+                                          prefixIcon: const Icon(
+                                            Icons.description_outlined,
+                                          ),
+                                          validator: Validators.required(
+                                            'Description is required',
+                                          ),
+                                          onChanged: (value) {
+                                            setState(() {}); // Recalculate total
+                                          },
+                                        ),
+                                        const SizedBox(
+                                          height: LayoutConstants.spaceSmall,
+                                        ),
+                                        Row(
+                                          children: [
+                                            // Quantity
+                                            Expanded(
+                                              child: TextInputField(
+                                                controller:
+                                                    item.quantityController,
+                                                label: 'Quantity *',
+                                                keyboardType:
+                                                    TextInputType.number,
+                                                prefixIcon: const Icon(
+                                                  Icons.numbers,
+                                                ),
+                                                validator: Validators.compose([
+                                                  Validators.required(
+                                                    'Quantity is required',
+                                                  ),
+                                                  Validators.positiveInteger(),
+                                                ]),
+                                                onChanged: (value) {
+                                                  setState(
+                                                    () {},
+                                                  ); // Recalculate total
+                                                },
+                                              ),
+                                            ),
+                                            const SizedBox(
+                                              width: LayoutConstants.spaceSmall,
+                                            ),
+                                            // Rate
+                                            Expanded(
+                                              child: TextInputField(
+                                                controller: item.rateController,
+                                                label: 'Rate *',
+                                                keyboardType:
+                                                    const TextInputType
+                                                        .numberWithOptions(
+                                                  decimal: true,
+                                                ),
+                                                prefixIcon: const Icon(
+                                                  Icons.currency_rupee,
+                                                ),
+                                                validator: Validators.compose([
+                                                  Validators.required(
+                                                    'Rate is required',
+                                                  ),
+                                                  Validators.nonNegativeDecimal(),
+                                                ]),
+                                                onChanged: (value) {
+                                                  setState(
+                                                    () {},
+                                                  ); // Recalculate total
+                                                },
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(
+                                          height: LayoutConstants.spaceSmall,
+                                        ),
+                                        // Note
+                                        TextInputField(
+                                          controller: item.noteController,
+                                          label: 'Note (Optional)',
+                                          maxLines: 2,
+                                          prefixIcon: const Icon(Icons.note),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
+                        const Divider(height: 24),
+                        // Total Amount Display
+                        Container(
+                          padding: const EdgeInsets.all(
+                            LayoutConstants.paddingMedium,
+                          ),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.primaryContainer
+                                .withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: theme.colorScheme.primary.withOpacity(0.5),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  'Total Amount:',
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Flexible(
+                                child: Text(
+                                  '₹${_totalAmount.toStringAsFixed(2)}',
+                                  style: theme.textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: theme.colorScheme.primary,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Total Amount:',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Flexible(
-                        child: Text(
-                          '₹${_totalAmount.toStringAsFixed(2)}',
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: theme.colorScheme.primary,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
                   ),
                 ),
                 const SizedBox(height: LayoutConstants.spaceMedium),

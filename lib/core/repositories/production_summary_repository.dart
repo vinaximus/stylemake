@@ -35,10 +35,10 @@ class ProductionSummaryRepository {
         .gte('cutting_date', fromStr)
         .lte('cutting_date', toStr);
 
-    // qty issued from fabrication_pos
+    // qty issued from po_order_items (sum of quantities)
     final pos = await _supabase
         .from('fabrication_pos')
-        .select('quantity_issued, style_id:cuttings(style_id), cuttings!inner(style_id)')
+        .select('id, style_id:cuttings(style_id), cuttings!inner(style_id), po_order_items(quantity)')
         .eq('company_id', _companyId)
         .gte('date_of_issue', fromStr)
         .lte('date_of_issue', toStr);
@@ -74,7 +74,13 @@ class ProductionSummaryRepository {
       final cut = (p['cuttings'] as Map<String, dynamic>?);
       final sid = cut?['style_id'] as String?;
       if (styleId == null || sid == styleId) {
-        qtyIssued += (p['quantity_issued'] as int);
+        // Sum quantities from order items
+        final orderItems = p['po_order_items'] as List?;
+        if (orderItems != null) {
+          for (final item in orderItems) {
+            qtyIssued += (item['quantity'] as int? ?? 0);
+          }
+        }
       }
     }
     for (final r in receipts as List) {
