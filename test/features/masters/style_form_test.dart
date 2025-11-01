@@ -66,8 +66,12 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // Enter 2 characters (less than minimum 3)
-      await tester.enterText(find.byType(TextFormField), 'ab');
+      // Find the Style Name field specifically (first TextFormField)
+      final textFields = find.byType(TextFormField);
+      expect(textFields, findsWidgets);
+      
+      // Enter 2 characters (less than minimum 3) in the first field (Style Name)
+      await tester.enterText(textFields.first, 'ab');
       await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
 
