@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stylemake/features/production/screens/receipts/receipt_form_screen.dart';
+import 'package:stylemake/features/production/presentation/views/receipts/receipt_form_screen.dart';
 
 void main() {
   testWidgets('Receipt form shows validation errors on empty submit', (tester) async {

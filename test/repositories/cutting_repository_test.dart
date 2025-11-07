@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stylemake/core/repositories/cutting_repository.dart';
+import 'package:stylemake/features/production/data/repositories/cutting_repository.dart';
 
 void main() {
   group('CuttingRepository', () {

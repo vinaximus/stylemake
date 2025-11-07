@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stylemake/core/widgets/list_card_item.dart';
+import 'package:stylemake/shared/widgets/list_card_item.dart';
 
 void main() {
   group('ListCardItem', () {

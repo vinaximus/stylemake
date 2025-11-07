@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stylemake/core/repositories/fabrication_po_repository.dart';
-import 'package:stylemake/core/services/supabase_service.dart';
+import 'package:stylemake/features/production/data/repositories/fabrication_po_repository.dart';
+import 'package:stylemake/app/services/supabase_service.dart';
 
 void main() {
   group('FabricationPoRepository Tests', () {

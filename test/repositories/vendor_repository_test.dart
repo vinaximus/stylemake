@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stylemake/core/repositories/vendor_repository.dart';
+import 'package:stylemake/features/masters/data/repositories/vendor_repository.dart';
 
 void main() {
   group('VendorRepository', () {

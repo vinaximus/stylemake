@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stylemake/features/production/screens/cuttings/cutting_form_screen.dart';
-import 'package:stylemake/core/utils/validators.dart';
+import 'package:stylemake/features/production/presentation/views/cuttings/cutting_form_screen.dart';
+import 'package:stylemake/shared/utils/validators.dart';
 
 void main() {
   group('Cutting Form Validation', () {

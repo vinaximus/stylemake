@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:stylemake/core/router/app_router.dart';
-import 'package:stylemake/core/services/supabase_service.dart';
-import 'package:stylemake/core/services/platform_service.dart';
-import 'package:stylemake/core/theme/app_theme.dart';
-import 'package:stylemake/core/theme/fluent_theme.dart';
-import 'package:stylemake/core/config/env_config.dart';
+import 'package:stylemake/app/config/env_config.dart';
+import 'package:stylemake/app/router/app_router.dart';
+import 'package:stylemake/app/services/platform_service.dart';
+import 'package:stylemake/app/services/supabase_service.dart';
+import 'package:stylemake/app/theme/app_theme.dart';
+import 'package:stylemake/app/theme/fluent_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

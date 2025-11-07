@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stylemake/core/utils/validators.dart';
+import 'package:stylemake/shared/utils/validators.dart';
 
 void main() {
   group('Validators', () {
